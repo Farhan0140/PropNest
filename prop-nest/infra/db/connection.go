@@ -5,6 +5,7 @@ import (
 	"propnest/config"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 func getConnectionString(cnf *config.DBConfig) string {
@@ -28,7 +29,7 @@ func NewConnection(cnf *config.DBConfig) (*sqlx.DB, error) {
 
 	dbCon, err := sqlx.Connect("postgres", dbSource)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("DB Connection: ", err)
 		return nil, err
 	}
 
