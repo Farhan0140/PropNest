@@ -1,13 +1,14 @@
 import { Route, Routes } from "react-router";
-import Authentication from "../pages/Auth/Authentication";
+import UserLogin from "../pages/Auth/UserLogin";
+import UserSignUp from "../pages/Auth/UserSignUp";
 
 const AppRoutes = () => {
   return (
     <Routes>
 
       <Route>
-        <Route path="sign-up" element={<Authentication flipped={true} />} />
-        <Route path="login" element={<Authentication flipped={false} />} />
+        <Route path="sign-up" element={<UserSignUp />} />
+        <Route path="login" element={<UserLogin />} />
       </Route>
       
     </Routes>
