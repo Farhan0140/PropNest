@@ -23,7 +23,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 	mux.Handle(
 		"GET /users/me",
 		manager.With(
-			http.HandlerFunc(h.GetUserById),
+			http.HandlerFunc(h.GetUserByJWT),
 		),
 	)
 }
