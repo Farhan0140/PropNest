@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (h *Handler) GetUserByJWT(w http.ResponseWriter, r *http.Request)  {
+func (h *Handler) GetUserByJWT(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 	authToken := strings.Split(authHeader, " ")
 	if len(authToken) != 2 || authToken[0] != "JWT" {
