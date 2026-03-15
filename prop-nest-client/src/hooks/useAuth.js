@@ -59,10 +59,42 @@ const useAuth = () => {
     }
   }
 
+  // For Login
+  const [loginLoading, setLoginLoading] = useState(false);
+  const loginUser = async(data) => {
+    setLoginLoading(true);
+
+    try {
+
+      const response = await apiClient.post("/users/login", {
+        email: data.email,
+        password: data.password
+      });
+      setAuthToken(response?.data);
+      localStorage.setItem("authTokens", response?.data)
+      return {
+        success: true,
+      }
+
+    } catch (error) {
+
+      console.log(error);
+      console.log(error.response);
+      return {
+        success: false,
+      }
+
+    } finally {
+      setLoginLoading(false);
+    }
+  }
+
   return {
       user,
       registerUser,
-      regLoading
+      regLoading,
+      loginUser,
+      loginLoading
   };
 };
 

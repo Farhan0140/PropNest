@@ -1,17 +1,40 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import useAuthContext from '../../hooks/useAuthContext';
+import { useNavigate } from 'react-router';
 
 const UserLogin = () => {
   const [showPassword, setShowPassword] = useState(true);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert("Signed up successfully!");
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: {errors},
+  } = useForm();
+    
+  const {loginUser, loginLoading} = useAuthContext();
+
+  const [loginErr, setLoginErr] = useState(false)
+  const [loginSuccess, setLoginSuccess] = useState(false);
+
+  const navigate = useNavigate()
+  
+  const onSubmit = async (data) => {
+    const res = await loginUser(data);
+    if (res.success) {
+      setLoginErr(false);
+      setLoginSuccess(res.success);
+      // TODO add dashboard route to redirect
+      setTimeout(() => navigate("/sign-up"), 2000)
+    } else {
+      setLoginErr(true);
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-stone-100 p-4 font-sans">
       <div className="w-full max-w-87.5">
-        <form onSubmit={handleSubmit} className="
+        <form onSubmit={handleSubmit(onSubmit)} className="
           flex flex-col items-start justify-center gap-5 
           p-5 bg-white rounded-lg 
           border-2 border-black 
@@ -23,6 +46,12 @@ const UserLogin = () => {
             Welcome,<br />
             <span className="text-gray-600 font-semibold text-base">sign up to continue</span>
           </div>
+
+          {
+            loginErr && (
+              <span className='text-red-500'>Check Email, Password <br />Try again!!</span>
+            )
+          }
 
           {/* Email Input */}
           <input 
@@ -38,7 +67,15 @@ const UserLogin = () => {
               placeholder:text-gray-500 placeholder:opacity-80
               focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
             " 
+            {
+              ...register("email", {required: "* This field is required"})
+            }
           />
+          {
+            errors.email && (
+              <span className="text-red-500">{errors.email.message}</span>
+            )
+          }
           
           {/* Password Input with Toggle */}
           <div className="relative w-full">
@@ -55,6 +92,9 @@ const UserLogin = () => {
                 placeholder:text-gray-500 placeholder:opacity-80
                 focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
               " 
+              {
+                ...register("password", {required: "* This field is required"})
+              }
             />
             <button
               type="button"
@@ -73,6 +113,27 @@ const UserLogin = () => {
               )}
             </button>
           </div>
+          {
+            errors.password && (
+              <span className="text-red-500">{errors.password.message}</span>
+            )
+          }
+
+          {/* For Message Box  */}
+          {loginSuccess && (
+            <div className={`
+                w-full h-10 rounded 
+                border-2 border-black bg-green-300
+                shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] 
+                text-base font-semibold text-gray-800 
+                cursor-pointer 
+                active:shadow-none active:translate-x-0.85 active:translate-y-0.85 transition-all
+                flex items-center justify-center
+              `}
+            >
+              Login Successful
+            </div>
+          )}
 
           {/* Submit Button */}
           <button 
@@ -86,8 +147,11 @@ const UserLogin = () => {
               active:shadow-none active:translate-x-0.85 active:translate-y-0.85 transition-all
               flex items-center justify-center
             "
+            disabled={loginLoading}
           >
-            Log in →
+            {
+              loginLoading? <span className="loading loading-dots loading-lg"></span> : "Log in →"
+            }
           </button>
         </form>
       </div>
