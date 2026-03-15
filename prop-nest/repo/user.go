@@ -2,9 +2,11 @@ package repo
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,6 +26,8 @@ type UserRepo interface {
 type userRepo struct {
 	db *sqlx.DB
 }
+
+var ErrUserExists = errors.New("user already exists")
 
 func NewUserRepo(db *sqlx.DB) UserRepo {
 	return &userRepo{
@@ -57,6 +61,11 @@ func (r *userRepo) Create(user User) (*User, error) {
 	row := r.db.QueryRow(query, user.Full_Name, user.Email, user.Password)
 	err = row.Scan(&user.ID)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" {
+				return nil, ErrUserExists
+			}
+		}
 		return nil, err
 	}
 	return &user, nil

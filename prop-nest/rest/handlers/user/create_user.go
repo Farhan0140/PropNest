@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"propnest/repo"
@@ -33,6 +34,12 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		fmt.Println(err)
+		
+		if errors.Is(err, repo.ErrUserExists) {
+			http.Error(w, "User already exists with this email", http.StatusConflict)
+			return
+		}
+
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
