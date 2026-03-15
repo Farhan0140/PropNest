@@ -27,7 +27,7 @@ const UserSignUp = () => {
     setFailedMsg(res.message);
 
     if(res.success) {
-      setTimeout(() => navigate("/login"), 1000)
+      setTimeout(() => navigate("/login"), 2000)
     }
   }
 
@@ -91,7 +91,7 @@ const UserSignUp = () => {
             )
           }
           
-          {/* Password Input with Toggle */}
+          {/* Password Input */}
           <div className="relative w-full">
             <input 
               type="password"

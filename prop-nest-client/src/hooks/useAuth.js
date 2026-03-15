@@ -46,9 +46,13 @@ const useAuth = () => {
       }
     } catch (error) {
       console.log(error);
+      const message =
+        error.response?.data?.error ||
+        error.response?.data ||
+        "Sign-Up Failed Try Again";
       return {
         success: false,
-        message: "Sign-Up Failed Try Again"
+        message: message
       }
     } finally {
       setRegLoading(false);
