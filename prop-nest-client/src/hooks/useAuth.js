@@ -57,7 +57,8 @@ const useAuth = () => {
 
   return {
       user,
-      registerUser
+      registerUser,
+      regLoading
   };
 };
 

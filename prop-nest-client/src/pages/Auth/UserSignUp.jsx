@@ -6,7 +6,7 @@ import { useNavigate } from "react-router";
 
 const UserSignUp = () => {
 
-  const {registerUser} = useAuthContext()
+  const {registerUser, regLoading} = useAuthContext()
 
   const {
     register,
@@ -186,9 +186,11 @@ const UserSignUp = () => {
               disabled:opacity-50
               disabled:cursor-not-allowed
             "
-            disabled={password !== confirmPassword}
+            disabled={password !== confirmPassword || regLoading}
           >
-            Let`s go →
+            {
+              regLoading ? <span className="loading loading-dots loading-xl text-natural"></span> : "Let`s go →"
+            }
           </button>
         </form>
       </div>
