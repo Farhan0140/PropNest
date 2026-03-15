@@ -8,7 +8,7 @@ import (
 	"propnest/repo"
 	"propnest/rest"
 	"propnest/rest/handlers/user"
-	// "propnest/rest/middlewares"
+	"propnest/rest/middlewares"
 )
 
 func Serve() {
@@ -25,10 +25,10 @@ func Serve() {
 		os.Exit(1)
 	}
 
-	// middlewares := middlewares.NewMiddleware(cnf)
+	middlewares := middlewares.NewMiddleware(cnf)
 
 	userRepo := repo.NewUserRepo(dbCon)
-	userHandler := user.NewHandler(cnf, userRepo)
+	userHandler := user.NewHandler(cnf, userRepo, middlewares)
 	
 	server := rest.NewServer(
 		cnf,

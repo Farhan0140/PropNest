@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"propnest/util"
 	"strings"
@@ -30,6 +32,11 @@ func (m *Middleware) AuthenticateJWT(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		fmt.Println("A jwt ", customClaims.Role)
+
+		ctx := context.WithValue(r.Context(), "userID", customClaims.ID)
+		ctx = context.WithValue(ctx, "role", customClaims.Role)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

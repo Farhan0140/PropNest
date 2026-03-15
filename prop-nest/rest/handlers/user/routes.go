@@ -10,6 +10,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 		"POST /users",
 		manager.With(
 			http.HandlerFunc(h.CreateUser),
+			h.middlewares.AuthenticateJWT,
 		),
 	)
 
@@ -24,6 +25,8 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 		"GET /users/me",
 		manager.With(
 			http.HandlerFunc(h.GetUserByJWT),
+			// h.middlewares.RequireRole("admin", "manager"),
+			// h.middlewares.AuthenticateJWT,
 		),
 	)
 }
