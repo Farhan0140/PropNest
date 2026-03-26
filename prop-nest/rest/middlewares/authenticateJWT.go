@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"propnest/util"
 	"strings"
@@ -31,8 +30,6 @@ func (m *Middleware) AuthenticateJWT(next http.Handler) http.Handler {
 			http.Error(w, "Unauthorize", http.StatusUnauthorized)
 			return
 		}
-
-		fmt.Println("A jwt ", customClaims.Role)
 
 		ctx := context.WithValue(r.Context(), "userID", customClaims.ID)
 		ctx = context.WithValue(ctx, "role", customClaims.Role)
