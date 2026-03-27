@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"database/sql"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -18,6 +20,7 @@ type PropertyInfo struct {
 
 type PropertyInfoRepo interface {
 	Create(propInfo PropertyInfo) (*PropertyInfo, error)
+	List(ownerId int) ([]*PropertyInfo, error)
 }
 
 type propertyInfoRepo struct {
@@ -61,4 +64,34 @@ func (r *propertyInfoRepo) Create(propInfo PropertyInfo) (*PropertyInfo, error) 
 	}
 
 	return &propInfo, nil
+}
+
+func (r *propertyInfoRepo) List(ownerId int) ([]*PropertyInfo, error) {
+	var propertyLst []*PropertyInfo
+
+	query := `
+		SELECT 
+			house_name,
+			address,
+			city,
+			postal_code,
+			number_of_floors,
+			total_units,
+			base_rent,
+			description
+		FROM 
+			properties
+		WHERE
+			owner_id = $1
+	`
+
+	err := r.db.Select(&propertyLst, query, ownerId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return propertyLst, nil
 }
