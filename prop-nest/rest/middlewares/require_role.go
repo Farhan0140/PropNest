@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -12,7 +11,6 @@ func (m *Middleware) RequireRole(roles ...string) Middlewares {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			role := r.Context().Value("role")
-			fmt.Println(role)
 
 			if role == nil {
 				http.Error(w, "Forbidden", http.StatusForbidden)

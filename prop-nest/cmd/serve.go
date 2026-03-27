@@ -7,6 +7,7 @@ import (
 	"propnest/infra/db"
 	"propnest/repo"
 	"propnest/rest"
+	propertyinfo "propnest/rest/handlers/property_info"
 	"propnest/rest/handlers/user"
 	"propnest/rest/middlewares"
 )
@@ -28,11 +29,15 @@ func Serve() {
 	middlewares := middlewares.NewMiddleware(cnf)
 
 	userRepo := repo.NewUserRepo(dbCon)
+	propertyInfoRepo := repo.NewPropertyInfoRepo(dbCon)
+
 	userHandler := user.NewHandler(cnf, userRepo, middlewares)
+	propertyinfoHandler := propertyinfo.NewHandler(middlewares, propertyInfoRepo)
 	
 	server := rest.NewServer(
 		cnf,
 		userHandler,
+		propertyinfoHandler,
 	)
 	server.Start()
 }

@@ -1,11 +1,21 @@
 package propertyinfo
 
-import "propnest/rest/middlewares"
+import (
+	"propnest/repo"
+	"propnest/rest/middlewares"
+)
 
 type Handler struct {
 	middlewares *middlewares.Middleware
+	propInfoRepo repo.PropertyInfoRepo
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(
+	middlewares *middlewares.Middleware,
+	propInfoRepo repo.PropertyInfoRepo,
+) *Handler {
+	return &Handler{
+		middlewares: middlewares,
+		propInfoRepo: propInfoRepo,
+	}
 }

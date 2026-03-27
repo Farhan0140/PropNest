@@ -1,15 +1,38 @@
+import { useForm } from "react-hook-form";
+import authApiClient from "../../services/auth-api-client";
 
 const PropertyUserForm = () => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert("Property information saved successfully!");
-  };
+
+  const {
+    register,
+    handleSubmit,
+    formState: {errors},
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    try {
+      const res = await authApiClient.post("/property-info", {
+        house_name: data.house_name,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postal_code,
+        number_of_floors: Number(data.number_of_floors),
+        total_units: Number(data.total_units),
+        base_rent: Number(data.base_rent),
+        description: data.description
+      })
+      console.log(res.data);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-200 p-1 md:p-4 font-sans">
       <div className="w-full my-10 md:my-0 max-w-87.5 md:max-w-150">
         <form 
-          onSubmit={handleSubmit} 
+          onSubmit={handleSubmit(onSubmit)} 
           className="flex flex-col items-start justify-center gap-5 
             md:p-5 p-2 bg-white rounded-lg 
             border-2 border-black 
@@ -25,106 +48,175 @@ const PropertyUserForm = () => {
 
           {/* Row 1: House Name & Address */}
           <div className="flex flex-col md:flex-row gap-5 w-full">
-            <input 
-              type="text" 
-              placeholder="House Name" 
-              name="house_name" 
-              className="
-                w-full h-10 rounded 
-                border-2 border-black bg-white 
-                shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-                text-sm font-semibold text-gray-800 
-                px-3 py-2 outline-none transition-all duration-200
-                placeholder:text-gray-500 placeholder:opacity-100
-                focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-              " 
-            />
-            <input 
-              type="text" 
-              placeholder="Address" 
-              name="address" 
-              className="
-                w-full h-10 rounded 
-                border-2 border-black bg-white 
-                shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-                text-sm font-semibold text-gray-800 
-                px-3 py-2 outline-none transition-all duration-200
-                placeholder:text-gray-500 placeholder:opacity-100
-                focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-              " 
-            />
+            <div className="w-full flex flex-col gap-1">
+              <input 
+                type="text" 
+                placeholder="* House Name" 
+                name="house_name" 
+                className="
+                  w-full h-10 rounded 
+                  border-2 border-black bg-white 
+                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
+                  text-sm font-semibold text-gray-800 
+                  px-3 py-2 outline-none transition-all duration-200
+                  placeholder:text-gray-500 placeholder:opacity-100
+                  focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                " 
+                {
+                  ...register("house_name", {required:"* This Field is Required"})
+                }
+              />
+              {
+                errors.house_name && (
+                  <span className="text-red-500">{errors.house_name.message}</span>
+                )
+              }
+            </div>
+
+            <div className="w-full flex flex-col gap-1">
+              <input 
+                type="text" 
+                placeholder="* Address" 
+                name="address" 
+                className="
+                  w-full h-10 rounded 
+                  border-2 border-black bg-white 
+                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
+                  text-sm font-semibold text-gray-800 
+                  px-3 py-2 outline-none transition-all duration-200
+                  placeholder:text-gray-500 placeholder:opacity-100
+                  focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                " 
+                {
+                  ...register("address", {required:"* This Field is Required"})
+                }
+              />
+              {
+                errors.address && (
+                  <span className="text-red-500">{errors.address.message}</span>
+                )
+              }
+            </div>
           </div>
 
           {/* Row 2: City & Postal Code */}
           <div className="flex flex-col md:flex-row gap-5 w-full">
-            <input 
-              type="text" 
-              placeholder="City" 
-              name="city" 
-              className="
-                w-full h-10 rounded 
-                border-2 border-black bg-white 
-                shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-                text-sm font-semibold text-gray-800 
-                px-3 py-2 outline-none transition-all duration-200
-                placeholder:text-gray-500 placeholder:opacity-100
-                focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-              " 
-            />
-            <input 
-              type="text" 
-              placeholder="Postal Code" 
-              name="postal_code" 
-              className="
-                w-full h-10 rounded 
-                border-2 border-black bg-white 
-                shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-                text-sm font-semibold text-gray-800 
-                px-3 py-2 outline-none transition-all duration-200
-                placeholder:text-gray-500 placeholder:opacity-100
-                focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-              " 
-            />
+
+            <div className="w-full flex flex-col gap-1">
+              <input 
+                type="text" 
+                placeholder="City" 
+                name="city" 
+                className="
+                  w-full h-10 rounded 
+                  border-2 border-black bg-white 
+                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
+                  text-sm font-semibold text-gray-800 
+                  px-3 py-2 outline-none transition-all duration-200
+                  placeholder:text-gray-500 placeholder:opacity-100
+                  focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                " 
+                {
+                  ...register("city")
+                }
+              />
+              {
+                errors.city && (
+                  <span className="text-red-500">{errors.city.message}</span>
+                )
+              }
+            </div>
+
+            <div className="w-full flex flex-col gap-1">
+              <input 
+                type="text" 
+                placeholder="Postal Code" 
+                name="postal_code" 
+                className="
+                  w-full h-10 rounded 
+                  border-2 border-black bg-white 
+                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
+                  text-sm font-semibold text-gray-800 
+                  px-3 py-2 outline-none transition-all duration-200
+                  placeholder:text-gray-500 placeholder:opacity-100
+                  focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                "
+                {
+                  ...register("postal_code")
+                } 
+              />
+              {
+                errors.postal_code && (
+                  <span className="text-red-500">{errors.postal_code.message}</span>
+                )
+              }
+            </div>
           </div>
 
           {/* Row 3: Number of Floors & Total Units Per Floor */}
           <div className="flex flex-col md:flex-row gap-5 w-full">
-            <input 
-              type="number" 
-              placeholder="Number of Floors" 
-              name="number_of_floors" 
-              className="
-                w-full h-10 rounded 
-                border-2 border-black bg-white 
-                shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-                text-sm font-semibold text-gray-800 
-                px-3 py-2 outline-none transition-all duration-200
-                placeholder:text-gray-500 placeholder:opacity-100
-                focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-              " 
-            />
-            <input 
-              type="number" 
-              placeholder="Total Units Per Floor" 
-              name="total_units" 
-              className="
-                w-full h-10 rounded 
-                border-2 border-black bg-white 
-                shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-                text-sm font-semibold text-gray-800 
-                px-3 py-2 outline-none transition-all duration-200
-                placeholder:text-gray-500 placeholder:opacity-100
-                focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-              " 
-            />
+
+            <div className="w-full flex flex-col gap-1">
+              <input 
+                type="number" 
+                placeholder="* Number of Floors" 
+                name="number_of_floors" 
+                min="1"
+                className="
+                  w-full h-10 rounded 
+                  border-2 border-black bg-white 
+                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
+                  text-sm font-semibold text-gray-800 
+                  px-3 py-2 outline-none transition-all duration-200
+                  placeholder:text-gray-500 placeholder:opacity-100
+                  focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                " 
+                {
+                  ...register("number_of_floors", {required:"* This Field is Required"})
+                }
+              />
+              {
+                errors.number_of_floors && (
+                  <span className="text-red-500">{errors.number_of_floors.message}</span>
+                )
+              }
+            </div>
+
+            <div className="w-full flex flex-col gap-1">
+              <input 
+                type="number" 
+                placeholder="* Total Units Per Floor" 
+                name="total_units" 
+                min="1"
+                className="
+                  w-full h-10 rounded 
+                  border-2 border-black bg-white 
+                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
+                  text-sm font-semibold text-gray-800 
+                  px-3 py-2 outline-none transition-all duration-200
+                  placeholder:text-gray-500 placeholder:opacity-100
+                  focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                " 
+                {
+                  ...register("total_units", {required:"* This Field is Required"})
+                }
+              />
+              {
+                errors.total_units && (
+                  <span className="text-red-500">{errors.total_units.message}</span>
+                )
+              }
+            </div>
           </div>
 
           {/* Row 4: Base Rent Per Unit */}
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-1">
             <input 
               type="number" 
-              placeholder="Base Rent Per Unit" 
+              placeholder="* Base Rent Per Unit" 
               name="base_rent" 
+              min="0"
+              step="1000"
               className="
                 w-full h-10 rounded 
                 border-2 border-black bg-white 
@@ -133,12 +225,20 @@ const PropertyUserForm = () => {
                 px-3 py-2 outline-none transition-all duration-200
                 placeholder:text-gray-500 placeholder:opacity-100
                 focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-              " 
+              "
+              {
+                ...register("base_rent", {required:"* This Field is Required"})
+              } 
             />
+            {
+              errors.base_rent && (
+                <span className="text-red-500 mt-1">{errors.base_rent.message}</span>
+              )
+            }
           </div>
 
           {/* Row 5: Description */}
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-1">
             <textarea 
               placeholder="Description" 
               name="description" 
@@ -153,7 +253,15 @@ const PropertyUserForm = () => {
                 focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
                 resize-none
               " 
+              {
+                ...register("description")
+              }
             />
+            {
+              errors.description && (
+                <span className="text-red-500">{errors.description.message}</span>
+              )
+            }
           </div>
 
           {/* Row 6: Submit Button */}

@@ -5,23 +5,27 @@ import (
 	"net/http"
 	"os"
 	"propnest/config"
+	propertyinfo "propnest/rest/handlers/property_info"
 	"propnest/rest/handlers/user"
 	"propnest/rest/middlewares"
 	"strconv"
 )
 
 type Server struct {
-	cnf         *config.Config
-	userHandler *user.Handler
+	cnf                 *config.Config
+	userHandler         *user.Handler
+	propertyinfoHandler *propertyinfo.Handler
 }
 
 func NewServer(
 	cnf *config.Config,
 	userHandler *user.Handler,
+	propertyinfoHandler *propertyinfo.Handler,
 ) *Server {
 	return &Server{
-		cnf: cnf,
-		userHandler: userHandler,
+		cnf:                 cnf,
+		userHandler:         userHandler,
+		propertyinfoHandler: propertyinfoHandler,
 	}
 }
 
@@ -37,6 +41,7 @@ func (server *Server) Start() {
 	wrappedMux := manager.WrapMux(mux)
 
 	server.userHandler.RegisterRoutes(mux, manager)
+	server.propertyinfoHandler.RegisterRoutes(mux, manager)
 
 	addr := ":" + strconv.Itoa(server.cnf.HttpPort)
 	fmt.Println("Server is Running on port ", addr)

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"propnest/repo"
+	"propnest/util"
 )
 
 type PropertyInfo struct {
@@ -29,6 +31,15 @@ func (h *Handler) CreatePropertyInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ownerId := r.Context().Value("userID")
-	fmt.Println("Owner Id: ", ownerId, newPropertyInfo.HouseName, newPropertyInfo.BaseRent)
+	ownerId := r.Context().Value("userID").(int)
+	newPropertyInfo.OwnerId = ownerId
+
+	created_prop_info, err := h.propInfoRepo.Create(repo.PropertyInfo(newPropertyInfo))
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	util.SendData(w, created_prop_info, http.StatusCreated)
 }
