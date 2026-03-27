@@ -1,5 +1,7 @@
 import { useForm } from "react-hook-form";
 import authApiClient from "../../services/auth-api-client";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const PropertyUserForm = () => {
 
@@ -9,7 +11,15 @@ const PropertyUserForm = () => {
     formState: {errors},
   } = useForm();
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFailed, setIsFailed] = useState(false);
+  const [failedMsg, setFailedMsg] = useState("");
+
+  const navigate = useNavigate();
+
   const onSubmit = async (data) => {
+    setIsLoading(true);
+
     try {
       const res = await authApiClient.post("/property-info", {
         house_name: data.house_name,
@@ -20,11 +30,23 @@ const PropertyUserForm = () => {
         total_units: Number(data.total_units),
         base_rent: Number(data.base_rent),
         description: data.description
-      })
+      });
+
+      setFailedMsg("Property Created Successfully");
       console.log(res.data);
 
+      setTimeout(() => navigate("/property"), 1000);
+      
     } catch (error) {
+      
+      setIsFailed(true);
+      setFailedMsg("Something Went Wrong!");
       console.log(error);
+    
+    } finally {
+
+      setIsLoading(false);
+
     }
   }
 
@@ -264,6 +286,22 @@ const PropertyUserForm = () => {
             }
           </div>
 
+          {/* For Message Box  */}
+          {failedMsg.length > 0 && (
+            <div className={`
+                w-full h-10 rounded 
+                border-2 border-black ${isFailed ? "bg-red-300" : "bg-green-300"}
+                shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] 
+                text-base font-semibold text-gray-800 
+                cursor-pointer 
+                active:shadow-none active:translate-x-0.85 active:translate-y-0.85 transition-all
+                flex items-center justify-center
+              `}
+            >
+              {failedMsg}
+            </div>
+          )}
+
           {/* Row 6: Submit Button */}
           <button 
             type="submit"
@@ -275,9 +313,14 @@ const PropertyUserForm = () => {
               cursor-pointer 
               active:shadow-none active:translate-x-0.75 active:translate-y-0.75 transition-all
               flex items-center justify-center
+              disabled:opacity-50
+              disabled:cursor-not-allowed
             "
+            disabled={isLoading}
           >
-            Save Property →
+            {
+              isLoading ? <span className="loading loading-dots loading-xl text-natural"></span> : "Save Property →"
+            }
           </button>
         </form>
       </div>

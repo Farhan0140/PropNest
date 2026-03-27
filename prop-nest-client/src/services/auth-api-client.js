@@ -11,7 +11,7 @@ authApiClient.interceptors.request.use(
     const token = localStorage.getItem("authTokens");
 
     if( token ) {
-      config.headers.Authorization = `JWT ${JSON.parse(token).access}`;
+      config.headers.Authorization = `JWT ${token}`;
     }
 
     return config;
