@@ -177,7 +177,7 @@ const UserSignUp = () => {
             type="submit"
             className="
               mt-4 w-full h-10 rounded 
-              border-2 border-black bg-white 
+              border-2 border-black bg-blue-200
               shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] 
               text-base font-semibold text-gray-800 
               cursor-pointer 

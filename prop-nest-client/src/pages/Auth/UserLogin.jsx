@@ -24,8 +24,8 @@ const UserLogin = () => {
     if (res.success) {
       setLoginErr(false);
       setLoginSuccess(res.success);
-      // TODO add dashboard route to redirect
-      setTimeout(() => navigate("/sign-up"), 2000)
+      // TODO add dashboard route to redirect user role based
+      setTimeout(() => navigate("/property"), 2000)
     } else {
       setLoginErr(true);
     }
@@ -140,12 +140,13 @@ const UserLogin = () => {
             type="submit"
             className="
               mt-4 w-full h-10 rounded 
-              border-2 border-black bg-white 
+              border-2 border-black bg-blue-200
               shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] 
               text-base font-semibold text-gray-800 
               cursor-pointer 
               active:shadow-none active:translate-x-0.85 active:translate-y-0.85 transition-all
               flex items-center justify-center
+              
             "
             disabled={loginLoading}
           >

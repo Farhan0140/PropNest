@@ -2,8 +2,8 @@ import { Route, Routes } from "react-router";
 import UserLogin from "../pages/Auth/UserLogin";
 import UserSignUp from "../pages/Auth/UserSignUp";
 import PropertyFormLayout from "../pages/Layouts/propertyFormLayout";
-import App from '../App.jsx'
 import PropertyUserForm from "../pages/PropertyPage/PropertyUserForm.jsx";
+import PropertyListing from "../pages/PropertyPage/PropertyListing.jsx";
 
 const AppRoutes = () => {
   return (
@@ -15,7 +15,7 @@ const AppRoutes = () => {
       </Route>
 
       <Route path="property" element={<PropertyFormLayout />}>
-        <Route index element={<App />} />
+        <Route index element={<PropertyListing />} />
         <Route path="form" element={<PropertyUserForm />} />
       </Route>
       

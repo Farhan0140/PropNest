@@ -238,7 +238,6 @@ const PropertyUserForm = () => {
               placeholder="* Base Rent Per Unit" 
               name="base_rent" 
               min="0"
-              step="1000"
               className="
                 w-full h-10 rounded 
                 border-2 border-black bg-white 
@@ -307,7 +306,7 @@ const PropertyUserForm = () => {
             type="submit"
             className="
               mt-2 w-full h-10 rounded 
-              border-2 border-black bg-white 
+              border-2 border-black bg-blue-200
               shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
               text-base font-semibold text-gray-800 
               cursor-pointer 
