@@ -2,11 +2,13 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type PropertyInfo struct {
+	Id             int     `json:"id" db:"id"`
 	OwnerId        int     `json:"owner_id" db:"owner_id"`
 	HouseName      string  `json:"house_name" db:"house_name"`
 	Address        string  `json:"address" db:"address"`
@@ -34,7 +36,14 @@ func NewPropertyInfoRepo(db *sqlx.DB) PropertyInfoRepo {
 }
 
 func (r *propertyInfoRepo) Create(propInfo PropertyInfo) (*PropertyInfo, error) {
-	query := `
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return nil, err 
+	}
+
+	defer tx.Rollback()
+
+	property_query := `
 		INSERT INTO properties (
 			owner_id,
 			house_name,
@@ -56,10 +65,42 @@ func (r *propertyInfoRepo) Create(propInfo PropertyInfo) (*PropertyInfo, error) 
 			$8,
 			$9
 		)
+		RETURNING id
 	`
 
-	_, err := r.db.Exec(query, propInfo.OwnerId, propInfo.HouseName, propInfo.Address, propInfo.City, propInfo.PostalCode, propInfo.NumberOfFloors, propInfo.TotalUnits, propInfo.BaseRent, propInfo.Description)
+	var property_id int
+
+	err = tx.QueryRow(property_query, propInfo.OwnerId, propInfo.HouseName, propInfo.Address, propInfo.City, propInfo.PostalCode, propInfo.NumberOfFloors, propInfo.TotalUnits, propInfo.BaseRent, propInfo.Description).Scan(&property_id)
 	if err != nil {
+		return nil, err
+	}
+
+	var units []map[string]interface{}
+	for floor := 1; floor <= propInfo.NumberOfFloors; floor++ {
+		for unit_no := 1; unit_no <= propInfo.TotalUnits; unit_no++ {
+			unitName := fmt.Sprintf("%d%02d", floor, unit_no)
+
+			units = append(units, map[string]interface{}{
+				"property_id": property_id,
+				"unit_name": unitName,
+				"rent_amount": propInfo.BaseRent,
+				"status": "vacant",
+			})
+		}
+	}
+
+	bulk_query := `
+		INSERT INTO units (
+			property_id, unit_name, rent_amount, status
+		) VALUES (:property_id, :unit_name, :rent_amount, :status)
+	`
+
+	_, err = tx.NamedExec(bulk_query, units)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 

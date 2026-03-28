@@ -34,7 +34,17 @@ func (h *Handler) CreatePropertyInfo(w http.ResponseWriter, r *http.Request) {
 	ownerId := r.Context().Value("userID").(int)
 	newPropertyInfo.OwnerId = ownerId
 
-	created_prop_info, err := h.propInfoRepo.Create(repo.PropertyInfo(newPropertyInfo))
+	created_prop_info, err := h.propInfoRepo.Create(repo.PropertyInfo{
+		OwnerId: newPropertyInfo.OwnerId,
+		HouseName: newPropertyInfo.HouseName,
+		Address: newPropertyInfo.Address,
+		City: newPropertyInfo.City,
+		PostalCode: newPropertyInfo.PostalCode,
+		NumberOfFloors: newPropertyInfo.NumberOfFloors,
+		TotalUnits: newPropertyInfo.TotalUnits,
+		BaseRent: newPropertyInfo.BaseRent,
+		Description: newPropertyInfo.Description,
+	})
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
