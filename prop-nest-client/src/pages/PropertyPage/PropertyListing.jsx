@@ -1,23 +1,12 @@
 import { Plus, Hotel, Info, X, MapPin, Home, DollarSign, Building, Mail, Hash } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
-import authApiClient from '../../services/auth-api-client';
+import useAdminContext from '../../hooks/Admin/useAdminContext';
 
 const PropertyListing = () => {
-  const [properties, setProperties] = useState([]);
+  const { properties } = useAdminContext();
+  
   const [activeInfo, setActiveInfo] = useState(null);
-
-  useEffect(() => {
-    (async() => {
-      try {
-        const res = await authApiClient.get("/properties")
-        setProperties(res.data);
-        console.log(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    })();
-  }, [])
 
   return (
     <div className="min-h-screen bg-gray-200 p-8 font-sans">

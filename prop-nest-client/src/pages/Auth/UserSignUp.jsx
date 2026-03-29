@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import useAuthContext from "../../hooks/useAuthContext";
+import useAuthContext from "../../hooks/Auth/useAuthContext";
 import { useNavigate } from "react-router";
 
 

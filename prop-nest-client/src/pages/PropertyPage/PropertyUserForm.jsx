@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
-import authApiClient from "../../services/auth-api-client";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import useAdminContext from "../../hooks/Admin/useAdminContext";
 
 const PropertyUserForm = () => {
 
@@ -11,42 +11,31 @@ const PropertyUserForm = () => {
     formState: {errors},
   } = useForm();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const { CreateProperty, setProperties, isCreatingProperty } = useAdminContext();
+
   const [isFailed, setIsFailed] = useState(false);
   const [failedMsg, setFailedMsg] = useState("");
 
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
 
     try {
-      const res = await authApiClient.post("/property-info", {
-        house_name: data.house_name,
-        address: data.address,
-        city: data.city,
-        postal_code: data.postal_code,
-        number_of_floors: Number(data.number_of_floors),
-        total_units: Number(data.total_units),
-        base_rent: Number(data.base_rent),
-        description: data.description
-      });
+      const res = await CreateProperty(data);
 
-      setFailedMsg("Property Created Successfully");
-      console.log(res.data);
+      if(res.response != null) {
 
-      setTimeout(() => navigate("/property"), 1000);
-      
+        setProperties((prev) => [...prev, res.response]);
+        console.log(res.response);
+        setFailedMsg(res.message);
+        setTimeout(() => navigate("/property"), 1000);
+
+      } else {
+        setIsFailed(true);
+        setFailedMsg(res.message);
+      }
     } catch (error) {
-      
-      setIsFailed(true);
-      setFailedMsg("Something Went Wrong!");
       console.log(error);
-    
-    } finally {
-
-      setIsLoading(false);
-
     }
   }
 
@@ -315,10 +304,10 @@ const PropertyUserForm = () => {
               disabled:opacity-50
               disabled:cursor-not-allowed
             "
-            disabled={isLoading}
+            disabled={isCreatingProperty}
           >
             {
-              isLoading ? <span className="loading loading-dots loading-xl text-natural"></span> : "Save Property →"
+              isCreatingProperty ? <span className="loading loading-dots loading-xl text-natural"></span> : "Save Property →"
             }
           </button>
         </form>
