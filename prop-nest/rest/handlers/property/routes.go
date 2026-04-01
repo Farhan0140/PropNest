@@ -7,7 +7,7 @@ import (
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manager) {
 	mux.Handle(
-		"POST /property-info",
+		"POST /properties",
 		manager.With(
 			http.HandlerFunc(h.CreatePropertyInfo),
 			h.middlewares.RequireRole("admin"),
@@ -19,6 +19,15 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 		"GET /properties",
 		manager.With(
 			http.HandlerFunc(h.GetPropertyList),
+			h.middlewares.RequireRole("admin"),
+			h.middlewares.AuthenticateJWT,
+		),
+	)
+
+	mux.Handle(
+		"DELETE /properties/{id}",
+		manager.With(
+			http.HandlerFunc(h.DeleteProperty),
 			h.middlewares.RequireRole("admin"),
 			h.middlewares.AuthenticateJWT,
 		),

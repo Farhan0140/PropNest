@@ -82,6 +82,7 @@ func (r *unitRepo) List(ownerId int) ([]*Unit, error) {
 }
 
 func (r *unitRepo) Delete(unit_id int) error {
+	// TODO check property id, or owner id if something happened
 	query := `
 		DELETE FROM units
 		WHERE id = $1

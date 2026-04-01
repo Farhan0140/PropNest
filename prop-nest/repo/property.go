@@ -23,6 +23,7 @@ type PropertyInfo struct {
 type PropertyInfoRepo interface {
 	Create(propInfo PropertyInfo) (*PropertyInfo, error)
 	List(ownerId int) ([]*PropertyInfo, error)
+	Delete(propertyId int, ownerId int) error
 }
 
 type propertyInfoRepo struct {
@@ -135,4 +136,21 @@ func (r *propertyInfoRepo) List(ownerId int) ([]*PropertyInfo, error) {
 	}
 
 	return propertyLst, nil
+}
+
+func (r *propertyInfoRepo) Delete(propertyId int, ownerId int) error {
+	query := `
+		DELETE FROM properties
+		WHERE id = $1 AND owner_id = $2
+	`
+
+	_, err := r.db.Exec(query, propertyId, ownerId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+
+		return err
+	}
+	return nil
 }
