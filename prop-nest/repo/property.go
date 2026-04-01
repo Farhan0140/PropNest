@@ -144,13 +144,22 @@ func (r *propertyInfoRepo) Delete(propertyId int, ownerId int) error {
 		WHERE id = $1 AND owner_id = $2
 	`
 
-	_, err := r.db.Exec(query, propertyId, ownerId)
+	result, err := r.db.Exec(query, propertyId, ownerId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil
 		}
 
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("unauthorized or unit not found")
 	}
 	return nil
 }

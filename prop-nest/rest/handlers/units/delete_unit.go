@@ -8,16 +8,17 @@ import (
 )
 
 func (h *Handler) DeleteUnit(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value("userID").(int)
 	unitId := r.PathValue("id")
 
-	uId, err := strconv.Atoi(unitId)
+	untId, err := strconv.Atoi(unitId)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	err = h.unitRepo.Delete(uId)
+	err = h.unitRepo.Delete(untId, userId)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

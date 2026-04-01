@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -17,7 +18,7 @@ type Unit struct {
 type UnitRepo interface {
 	Create(unit Unit) (*Unit, error)
 	List(ownerId int) ([]*Unit, error)
-	Delete(unit_id int) error
+	Delete(unit_id int, ownerID int) error
 }
 
 type unitRepo struct {
@@ -81,20 +82,31 @@ func (r *unitRepo) List(ownerId int) ([]*Unit, error) {
 	return unitList, nil
 }
 
-func (r *unitRepo) Delete(unit_id int) error {
-	// TODO check property id, or owner id if something happened
+func (r *unitRepo) Delete(unit_id int, owner_id int) error {
 	query := `
 		DELETE FROM units
 		WHERE id = $1
+		AND property_id IN (
+			SELECT id FROM properties WHERE owner_id = $2
+		);
 	`
 
-	_, err := r.db.Exec(query, unit_id)
+	result, err := r.db.Exec(query, unit_id, owner_id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil
 		}
 
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("unauthorized or unit not found")
 	}
 
 	return nil
