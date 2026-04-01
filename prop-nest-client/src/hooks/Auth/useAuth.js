@@ -90,6 +90,8 @@ const useAuth = () => {
   }
 
   return {
+      authToken,
+      
       user,
       registerUser,
       regLoading,

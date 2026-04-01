@@ -4,27 +4,16 @@ import {
   Wrench, Plus, CheckCircle, AlertCircle, Clock,
   FileText, X
 } from 'lucide-react';
+import useAdminContext from '../../hooks/Admin/useAdminContext';
+import AddPropertyForm from '../modals/AddPropertyForm';
+import AddUnitForm from '../modals/AddUnitForm';
 
 const Main_Dashboard = () => {
+
+  const { properties, units } = useAdminContext();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
-
-  // Sample Data
-  const properties = [
-    { id: 1, name: 'Green House', address: 'Basundhara, Dhaka', city: 'Dhaka', totalUnits: 4, occupiedUnits: 3, vacantUnits: 1, floors: 9, baseRent: 15000 },
-    { id: 2, name: 'Sunset Apartments', address: 'Gulshan, Dhaka', city: 'Dhaka', totalUnits: 24, occupiedUnits: 22, vacantUnits: 2, floors: 6, baseRent: 18000 },
-    { id: 3, name: 'Oak Valley Condos', address: 'Banani, Dhaka', city: 'Dhaka', totalUnits: 18, occupiedUnits: 15, vacantUnits: 3, floors: 4, baseRent: 22000 },
-    { id: 4, name: 'Downtown Lofts', address: 'Dhanmondi, Dhaka', city: 'Dhaka', totalUnits: 32, occupiedUnits: 31, vacantUnits: 1, floors: 8, baseRent: 25000 },
-  ];
-
-  const units = [
-    { id: 1, number: 'Unit 101', property: 'Green House', size: '750 sqft', rent: 15000, status: 'occupied', renter: 'John Smith' },
-    { id: 2, number: 'Unit 102', property: 'Green House', size: '950 sqft', rent: 18000, status: 'vacant', renter: null },
-    { id: 3, number: 'Unit 201', property: 'Sunset Apartments', size: '1100 sqft', rent: 22000, status: 'occupied', renter: 'Sarah Johnson' },
-    { id: 4, number: 'Unit 202', property: 'Sunset Apartments', size: '800 sqft', rent: 16000, status: 'vacant', renter: null },
-    { id: 5, number: 'Unit 301', property: 'Oak Valley Condos', size: '550 sqft', rent: 14000, status: 'occupied', renter: 'Mike Brown' },
-    { id: 6, number: 'Unit 302', property: 'Oak Valley Condos', size: '1500 sqft', rent: 32000, status: 'vacant', renter: null },
-  ];
 
   const maintenanceRequests = [
     { id: 1, title: 'Tap Leaking', unit: 'Unit 304', property: 'Green House', renter: 'John Smith', priority: 'urgent', status: 'pending', date: '2024-01-15', notes: [] },
@@ -33,6 +22,7 @@ const Main_Dashboard = () => {
     { id: 4, title: 'Door Lock Broken', unit: 'Unit 402', property: 'Green House', renter: 'Emily Davis', priority: 'urgent', status: 'completed', date: '2024-01-14', notes: ['Fixed', 'New lock installed'] },
   ];
 
+  // TODO in stats fix monthly rent collected, pending rent, total expenses, maintenance requests
   const stats = [
     { label: 'Total Properties', value: properties.length, icon: Building, color: 'bg-blue-400' },
     { label: 'Total Units', value: units.length, icon: Home, color: 'bg-green-400' },
@@ -131,7 +121,7 @@ const Main_Dashboard = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 backdrop-blur-sm" onClick={closeModal}></div>
+          <div className="absolute inset-0 backdrop-blur-sm"></div>
           <div className="relative bg-gray-300 border-2 border-black rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-gray-300 border-b-2 border-black p-4 flex items-center justify-between">
               <h3 className="text-xl font-bold text-black">
@@ -144,56 +134,14 @@ const Main_Dashboard = () => {
                 <X className="w-5 h-5 text-black" />
               </button>
             </div>
+
             <div className="p-4 space-y-4">
               {modalType === 'addProperty' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-bold text-black mb-1">Property Name</label>
-                    <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-black mb-1">Address</label>
-                    <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-black mb-1">City</label>
-                      <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-black mb-1">Total Units</label>
-                      <input type="number" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
-                    </div>
-                  </div>
-                </>
+                <AddPropertyForm onCloseButtonClick={closeModal} />
               )}
 
               {modalType === 'addUnit' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-bold text-black mb-1">Unit Number</label>
-                    <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-black mb-1">Property</label>
-                    <select className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none">
-                      <option>Select Property</option>
-                      {properties.map(prop => (
-                        <option key={prop.id}>{prop.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-black mb-1">Size (sqft)</label>
-                      <input type="number" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-black mb-1">Rent</label>
-                      <input type="number" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
-                    </div>
-                  </div>
-                </>
+                <AddUnitForm onCloseButtonClick={closeModal} />
               )}
 
               {modalType === 'addRenter' && (
@@ -240,15 +188,6 @@ const Main_Dashboard = () => {
                   </div>
                 </>
               )}
-
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-black">
-                <button onClick={closeModal} className="bg-white border-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                  Cancel
-                </button>
-                <button onClick={closeModal} className="bg-green-400 border-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                  Save
-                </button>
-              </div>
             </div>
           </div>
         </div>

@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import authApiClient from "../../services/auth-api-client";
+import useAuthContext from "../Auth/useAuthContext";
 
 const useAdmin = () => {
   const [properties, setProperties] = useState([]);
+  const [units, setUnits] = useState([]);
+
+  const {authToken} = useAuthContext();
   
   useEffect(() => {
     (async() => {
@@ -18,7 +22,23 @@ const useAdmin = () => {
 
       }
     })();
-  }, []);
+  }, [authToken]);
+
+  useEffect(() => {
+    (async() => {
+      try {
+
+        const res = await authApiClient.get("/units");
+        console.log(res.data);
+        setUnits(res.data);
+      
+      } catch (error) {
+
+        console.log(error);
+
+      }
+    })();
+  }, [authToken]);
 
 
   // Property Creation Part
@@ -29,7 +49,7 @@ const useAdmin = () => {
     setIsCreatingProperty(true);
 
     try {
-      const res = await authApiClient.post("/property-info", {
+      const res = await authApiClient.post("/properties", {
         house_name: data.house_name,
         address: data.address,
         city: data.city,
@@ -55,13 +75,46 @@ const useAdmin = () => {
       setIsCreatingProperty(false);
     }
   }
+    
+  const [isCreatingUnit, setIsCreatingUnit] = useState(false);
+  const CreateUnit = async(data) => {
+    setIsCreatingUnit(true);
+
+    try {
+      // const res = await authApiClient.post("/units", {
+      //   property_id: Number(data.property_id),
+      //   unit_name: data.unit_name,
+      //   rent_amount: Number(data.rent_amount),
+      //   status: data.status
+      // })
+      console.log(data);
+
+      return {
+        response: res.data,
+        message: "Unit Created Successfully"
+      }
+    } catch (error) {
+      console.log(error);
+
+      return {
+        response: null,
+        message: "Something Want Wrong!!!"
+      }
+    } finally {
+      setIsCreatingUnit(false);
+    }
+  }
 
   return {
     properties,
-
     CreateProperty,
     setProperties,
     isCreatingProperty,
+
+    units,
+    setUnits,
+    CreateUnit,
+    isCreatingUnit
   };
 };
 

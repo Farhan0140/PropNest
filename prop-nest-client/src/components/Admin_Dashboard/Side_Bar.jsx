@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   Building2, 
   Users, 
@@ -11,12 +11,32 @@ import {
   Bell,
 } from 'lucide-react';
 import { Outlet, useNavigate } from 'react-router';
+import useAuthContext from '../../hooks/Auth/useAuthContext';
 
 const Side_Bar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [notificationCount, setNotificationCount] = useState(3);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  
+  const profileContainerRef = useRef(null);
+
+  const { user, authToken } = useAuthContext();
+  console.log(user);
+  
+  const navigate = useNavigate();
+
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileContainerRef.current && !profileContainerRef.current.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const menuItems = [
     {
@@ -75,13 +95,8 @@ const Side_Bar = () => {
     setActiveSubmenu(activeSubmenu === index ? null : index);
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    alert("Logged in successfully!");
-  };
-
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    setProfileMenuOpen(false);
     alert("Logged out successfully!");
   };
 
@@ -91,14 +106,17 @@ const Side_Bar = () => {
   };
 
   const handleProfileClick = () => {
+    setProfileMenuOpen(!profileMenuOpen);
+  };
+
+  const handleProfileMenuClick = () => {
     alert("Opening profile settings...");
+    setProfileMenuOpen(false);
   };
 
   const handleSubmenuClick = (submenuItem) => {
     alert(`Navigating to: ${submenuItem.label}`);
   };
-
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-200 font-sans">
@@ -139,7 +157,7 @@ const Side_Bar = () => {
               flex items-center justify-center
             "
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-5 h-5 text-black" />
             {notificationCount > 0 && (
               <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 border-2 border-black rounded-full flex items-center justify-center text-xs font-black text-white">
                 {notificationCount}
@@ -147,41 +165,86 @@ const Side_Bar = () => {
             )}
           </button>
 
-          {isLoggedIn ? (
+          {authToken ? (
             <>
-              {/* Profile Button in Header */}
-              <button 
-                onClick={handleProfileClick}
-                className="
-                  flex items-center gap-2 px-4 py-2 rounded 
-                  border-2 border-black bg-white 
-                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-                  cursor-pointer 
-                  active:shadow-none active:translate-x-0.75 active:translate-y-0.75 transition-all
-                "
-              >
-                <User className="w-5 h-5" />
-                <span className="font-semibold text-gray-800 hidden sm:block">Profile</span>
-              </button>
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="
-                  px-4 py-2 rounded 
-                  border-2 border-black bg-white 
-                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-                  cursor-pointer 
-                  active:shadow-none active:translate-x-0.75 active:translate-y-0.75 transition-all
-                  font-semibold text-gray-800
-                "
-              >
-                Logout
-              </button>
+              {/* Profile Dropdown */}
+              <div className="relative" ref={profileContainerRef}>
+                {/* Profile Trigger */}
+                <div
+                  onClick={handleProfileClick}
+                  className="
+                    px-2.5 py-2 rounded-md
+                    border-2 border-black bg-white
+                    shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)]
+                    active:shadow-none active:translate-x-0.75 active:translate-y-0.75
+                    cursor-pointer transition-all select-none
+                  "
+                >
+                  <div className="w-5 h-5 flex justify-center items-center">
+                    <User size={18} strokeWidth={2.5} className='text-black' />
+                  </div>
+                  
+                  
+                </div>
+
+                {/* Dropdown Menu */}
+                <div
+                  className={`
+                    absolute right-0 mt-2 w-40
+                    bg-white border-2 border-black
+                    shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)]
+                    rounded overflow-hidden z-50
+                    transition-all duration-200 origin-top-right
+                    ${
+                      profileMenuOpen
+                        ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
+                        : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                    }
+                  `}
+                >
+                  {/* Name Field */}
+                  <div className="px-3 py-2 border-b-2 border-black bg-gray-50">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                      Signed in as
+                    </p>
+                    <div className="font-bold text-sm truncate text-black">{user?.full_name}</div>
+                  </div>
+
+                  {/* Menu Actions */}
+                  <div className="p-1 flex flex-col gap-1">
+                    {/* Profile Button */}
+                    <button
+                      onClick={handleProfileMenuClick}
+                      className="w-full text-left px-3 py-2 font-bold text-gray-800 text-sm hover:bg-black hover:text-white border-2 border-transparent hover:border-black transition-colors rounded"
+                    >
+                      Profile
+                    </button>
+
+                    {/* Settings Button */}
+                    <button
+                      onClick={handleProfileMenuClick}
+                      className="w-full text-left px-3 py-2 font-bold text-gray-800 text-sm hover:bg-black hover:text-white border-2 border-transparent hover:border-black transition-colors rounded"
+                    >
+                      Settings
+                    </button>
+
+                    <div className="h-px w-full bg-black my-0.5"></div>
+
+                    {/* Logout Button */}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-3 py-2 font-bold text-red-600 text-sm hover:bg-red-500 hover:text-white border-2 border-transparent hover:border-red-500 transition-colors rounded"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
             </>
           ) : (
             /* Login Button */
             <button
-              onClick={handleLogin}
+              onClick={() => navigate("/login")}
               className="
                 px-4 py-2 rounded 
                 border-2 border-black bg-white 
@@ -222,14 +285,17 @@ const Side_Bar = () => {
                     }
                   }
                 }
-                className="
+                className={`
                   w-full flex items-center gap-3 px-4 py-3 rounded 
                   border-2 border-black bg-white 
                   shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
                   cursor-pointer 
                   active:shadow-none active:translate-x-0.75 active:translate-y-0.75 transition-all
                   font-semibold text-gray-800
-                "
+                  hover:bg-blue-200
+                  active:bg-green-200 active:text-black
+                  focus:bg-gray-500 focus:text-white
+                `}
               >
                 <menuItem.icon className="w-5 h-5" />
                 <span>{menuItem.label}</span>
@@ -249,7 +315,7 @@ const Side_Bar = () => {
                     <button 
                       key={key}
                       onClick={() => handleSubmenuClick(submenuItem)}
-                      className="text-left px-3 py-2 rounded border-2 border-black bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.7)] cursor-pointer active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all text-sm font-semibold text-gray-700"
+                      className="text-left px-3 py-2 rounded border-2 focus:bg-gray-500 focus:text-white hover:bg-blue-200 border-black bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.7)] cursor-pointer active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all text-sm font-semibold text-gray-700"
                     >
                       {submenuItem.label}
                     </button>
@@ -263,21 +329,41 @@ const Side_Bar = () => {
 
         {/* Fixed Bottom Profile Section */}
         <div className="p-4 border-t-2 border-black bg-white">
-          <button
-            onClick={handleProfileClick}
-            className="
-              w-full flex items-center gap-3 px-4 py-3 rounded 
-              border-2 border-black bg-gray-100 
-              shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
-              cursor-pointer 
-              active:shadow-none active:translate-x-0.75 active:translate-y-0.75 transition-all
-              font-semibold text-gray-800
-            "
-          >
-            <User className="w-5 h-5" />
-            <span>My Profile</span>
-          </button>
+          {
+            authToken ? (
+              <button
+                onClick={handleProfileMenuClick}
+                className="
+                  w-full flex items-center gap-3 px-4 py-3 rounded 
+                  border-2 border-black bg-gray-100 
+                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
+                  cursor-pointer 
+                  active:shadow-none active:translate-x-0.75 active:translate-y-0.75 transition-all
+                  font-semibold text-gray-800
+                "
+              >
+                <User className="w-5 h-5" />
+                <span>{user?.full_name}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/login")}
+                className="
+                  px-4 py-2 rounded 
+                  w-full
+                  border-2 border-black bg-white 
+                  shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] 
+                  cursor-pointer 
+                  active:shadow-none active:translate-x-0.75 active:translate-y-0.75 transition-all
+                  font-semibold text-gray-800
+                "
+              >
+                Login
+              </button>
+            )
+          }
         </div>
+
       </aside>
 
       {/* Main Content */}

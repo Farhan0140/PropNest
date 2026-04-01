@@ -1,4 +1,4 @@
-import { Plus, Hotel, Info, X, MapPin, Home, DollarSign, Building, Mail, Hash } from 'lucide-react';
+import { Plus, Hotel, Info, X, MapPin, Home, DollarSign, Building, Mail, Hash, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import useAdminContext from '../../hooks/Admin/useAdminContext';
@@ -118,6 +118,28 @@ const PropertyListing = () => {
               </div>
             </Link>
           </div>
+          
+          <div className="group cursor-pointer relative">
+            <Link to="/admin-dashboard">
+              {/* Card Preview */}
+              <div className="bg-white border-2 border-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col h-full relative">
+                <div className="h-48 bg-white p-4 border-b-2 border-black">
+                  <div className="w-full h-full flex items-center justify-center">
+                    <LayoutDashboard className="w-20 h-20 text-black" strokeWidth={2} />
+                  </div>
+                </div>
+                
+                <div className="p-4">
+                  {/* Title */}
+                  <h3 className="text-lg font-semibold text-black mb-1">
+                    Dashboard
+                  </h3>
+                </div>
+              </div>
+            </Link>
+          </div>
+
+
         </div>
       </div>
     </div>
