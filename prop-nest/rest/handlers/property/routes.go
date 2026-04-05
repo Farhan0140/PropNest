@@ -25,6 +25,15 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 	)
 
 	mux.Handle(
+		"PUT /properties", 
+		manager.With(
+			http.HandlerFunc(h.UpdateProperty),
+			h.middlewares.RequireRole("admin"),
+			h.middlewares.AuthenticateJWT,
+		),
+	)
+
+	mux.Handle(
 		"DELETE /properties/{id}",
 		manager.With(
 			http.HandlerFunc(h.DeleteProperty),

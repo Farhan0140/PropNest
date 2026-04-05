@@ -23,6 +23,7 @@ type PropertyInfo struct {
 type PropertyInfoRepo interface {
 	Create(propInfo PropertyInfo) (*PropertyInfo, error)
 	List(ownerId int) ([]*PropertyInfo, error)
+	Update(propInfo PropertyInfo, ownerId int) (*PropertyInfo, error)
 	Delete(propertyId int, ownerId int) error
 }
 
@@ -139,6 +140,36 @@ func (r *propertyInfoRepo) List(ownerId int) ([]*PropertyInfo, error) {
 	return propertyLst, nil
 }
 
+func (r *propertyInfoRepo) Update(propInfo PropertyInfo, ownerId int) (*PropertyInfo, error) {
+	query := `
+		UPDATE properties
+		SET 
+			house_name = $1, 
+			address = $2,
+			city = $3,
+			postal_code = $4,
+			number_of_floors = $5,
+			total_units = $6,
+			base_rent = $7
+		WHERE id = $8 AND owner_id = $9
+	`
+
+	result, err := r.db.Exec(query, propInfo.HouseName, propInfo.Address, propInfo.City, propInfo.PostalCode, propInfo.NumberOfFloors, propInfo.TotalUnits, propInfo.BaseRent, propInfo.Id, ownerId)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("Property not found")
+	}
+
+	return &propInfo, nil
+}
+
 func (r *propertyInfoRepo) Delete(propertyId int, ownerId int) error {
 	query := `
 		DELETE FROM properties
@@ -160,7 +191,7 @@ func (r *propertyInfoRepo) Delete(propertyId int, ownerId int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("unauthorized or unit not found")
+		return fmt.Errorf("Property not found")
 	}
 	return nil
 }

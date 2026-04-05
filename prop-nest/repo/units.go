@@ -62,6 +62,7 @@ func (r *unitRepo) List(ownerId int) ([]*Unit, error) {
 	query := `
 		SELECT 
 			u.id, 
+			u.property_id,
 			u.unit_name, 
 			u.rent_amount, 
 			u.status
@@ -106,7 +107,7 @@ func (r *unitRepo) Delete(unit_id int, owner_id int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("unauthorized or unit not found")
+		return fmt.Errorf("Unit not found")
 	}
 
 	return nil
