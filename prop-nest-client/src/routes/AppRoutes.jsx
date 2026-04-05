@@ -7,6 +7,7 @@ import PropertyListing from "../pages/PropertyPage/PropertyListing.jsx";
 import Side_Bar from "../components/Admin_Dashboard/Side_Bar.jsx";
 import Main_Dashboard from "../components/Admin_Dashboard/Main_Dashboard.jsx";
 import App from "../App.jsx";
+import Property_Dashboard from "../components/Admin_Dashboard/Property_Dashboard.jsx";
 
 const AppRoutes = () => {
   return (
@@ -25,6 +26,7 @@ const AppRoutes = () => {
 
       <Route path="admin-dashboard" element={<Side_Bar />}>
         <Route index element={<Main_Dashboard />}/>
+        <Route path="property-dashboard" element={<Property_Dashboard />} />
       </Route>
       
     </Routes>

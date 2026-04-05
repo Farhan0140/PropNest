@@ -10,7 +10,7 @@ import {
   LayoutDashboard,
   Bell,
 } from 'lucide-react';
-import { Outlet, useNavigate } from 'react-router';
+import { Link, Outlet, useNavigate } from 'react-router';
 import useAuthContext from '../../hooks/Auth/useAuthContext';
 
 const Side_Bar = () => {
@@ -20,9 +20,7 @@ const Side_Bar = () => {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   
   const profileContainerRef = useRef(null);
-
   const { user, authToken } = useAuthContext();
-  console.log(user);
   
   const navigate = useNavigate();
 
@@ -49,11 +47,7 @@ const Side_Bar = () => {
       id: 1,
       label: 'Properties',
       icon: Building2,
-      submenus: {
-        allProperties: { label: 'All Properties', path: '/properties/all' },
-        addProperty: { label: 'Add Property', path: '/properties/add' },
-        propertySettings: { label: 'Property Settings', path: '/properties/settings' }
-      }
+      to: 'property-dashboard',
     },
     {
       id: 2,
@@ -313,8 +307,12 @@ const Side_Bar = () => {
                   {/* Submenu items rendered with map from object */}
                   {Object.entries(menuItem.submenus).map(([key, submenuItem]) => (
                     <button 
+                      onClick={() => {
+                          navigate(submenuItem.path)
+                          setSidebarOpen(false)
+                        }
+                      }
                       key={key}
-                      onClick={() => handleSubmenuClick(submenuItem)}
                       className="text-left px-3 py-2 rounded border-2 focus:bg-gray-500 focus:text-white hover:bg-blue-200 border-black bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.7)] cursor-pointer active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all text-sm font-semibold text-gray-700"
                     >
                       {submenuItem.label}

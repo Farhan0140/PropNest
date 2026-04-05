@@ -14,9 +14,6 @@ const AddUnitForm = ({ onCloseButtonClick }) => {
   const [isFailed, setIsFailed] = useState(false);
   const [failedMsg, setFailedMsg] = useState("");
 
-  // TODO fix property id from backend it's not return property id
-  console.log(properties);
-
   // Status options
   const statusOptions = [
     { value: "available", label: "Available" },
@@ -67,7 +64,7 @@ const AddUnitForm = ({ onCloseButtonClick }) => {
             </option>
             {properties.map((property) => (
               <option key={property.id} value={property.id} className="text-black">
-                {property.house_name} {property.id}
+                {property.house_name}
               </option>
             ))}
           </select>

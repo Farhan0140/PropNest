@@ -1,25 +1,51 @@
 import { useForm } from "react-hook-form";
 import useAdminContext from "../../hooks/Admin/useAdminContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const AddPropertyForm = ({ onCloseButtonClick }) => {
+const AddPropertyForm = ({ onCloseButtonClick, defaultValues = {}, isEdit = false }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+    reset,
+  } = useForm({
+    defaultValues,
+  });
 
-  const { CreateProperty, setProperties, isCreatingProperty } = useAdminContext();
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
+
+  // TODO Add Update Property Context after making route in go server
+  const { 
+    CreateProperty, 
+    setProperties, 
+    isCreatingProperty, 
+  } = useAdminContext();
 
   const [isFailed, setIsFailed] = useState(false);
   const [failedMsg, setFailedMsg] = useState("");
 
   const onSubmit = async (data) => {
+    let res;
+
     try {
-      const res = await CreateProperty(data);
+      if(isEdit) {
+        console.log(defaultValues);
+        // TODO call update property context
+      } else {
+        res = await CreateProperty(data);
+      }
 
       if (res.response != null) {
-        setProperties((prev) => [...prev, res.response]);
+        if(isEdit) {
+          setProperties((prev) => prev.map((p) => 
+            p.id === defaultValues.id ? res.response : p
+          ));
+        } else {
+          setProperties((prev) => [...prev, res.response]);
+        }
+
         console.log(res.response);
         setFailedMsg(res.message);
         setIsFailed(false);
@@ -175,7 +201,7 @@ const AddPropertyForm = ({ onCloseButtonClick }) => {
       {failedMsg.length > 0 && (
         <div
           className={`
-            w-full h-10 rounded 
+            w-full md:h-10 h-16 rounded p-5
             border-2 border-black ${isFailed ? "bg-red-300" : "bg-green-300"}
             shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] 
             text-base font-semibold text-gray-800 
@@ -225,7 +251,7 @@ const AddPropertyForm = ({ onCloseButtonClick }) => {
               Saving...
             </span>
           ) : (
-            "Save"
+            isEdit ? "Update" : "Save"
           )}
         </button>
       </div>

@@ -81,13 +81,13 @@ const useAdmin = () => {
     setIsCreatingUnit(true);
 
     try {
-      // const res = await authApiClient.post("/units", {
-      //   property_id: Number(data.property_id),
-      //   unit_name: data.unit_name,
-      //   rent_amount: Number(data.rent_amount),
-      //   status: data.status
-      // })
-      console.log(data);
+      const res = await authApiClient.post("/units", {
+        property_id: Number(data.property_id),
+        unit_name: data.unit_name,
+        rent_amount: Number(data.rent_amount),
+        status: data.status
+      })
+      console.log(res.data);
 
       return {
         response: res.data,
