@@ -113,6 +113,7 @@ func (r *propertyInfoRepo) List(ownerId int) ([]*PropertyInfo, error) {
 
 	query := `
 		SELECT 
+			id,
 			house_name,
 			address,
 			city,
