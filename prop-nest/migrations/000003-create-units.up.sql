@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS units (
     property_id BIGINT NOT NULL,
     unit_name VARCHAR(20) NOT NULL,
     rent_amount NUMERIC(12,2),
-    status VARCHAR(20) DEFAULT 'vacant',
+    status VARCHAR(20) DEFAULT 'available',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_property
