@@ -18,6 +18,7 @@ type Unit struct {
 type UnitRepo interface {
 	Create(unit Unit) (*Unit, error)
 	List(ownerId int) ([]*Unit, error)
+	Update(unit Unit, ownerID int) (*Unit, error)
 	Delete(unit_id int, ownerID int) error
 }
 
@@ -81,6 +82,35 @@ func (r *unitRepo) List(ownerId int) ([]*Unit, error) {
 	}
 
 	return unitList, nil
+}
+
+func (r *unitRepo) Update(unit Unit, ownerID int) (*Unit, error) {
+	query := `
+		UPDATE units
+		SET 
+			unit_name = $1,
+			rent_amount = $2,
+			status = $3
+		FROM properties
+		WHERE units.property_id = properties.id
+		AND units.id = $4
+		AND properties.owner_id = $5
+	`
+
+	result, err := r.db.Exec(query, unit.UnitName, unit.RentAmount, unit.Status, unit.Id, ownerID)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("Unit not found")
+	}
+
+	return &unit, nil
 }
 
 func (r *unitRepo) Delete(unit_id int, owner_id int) error {

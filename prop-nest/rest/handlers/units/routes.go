@@ -23,6 +23,15 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 			h.middlewares.AuthenticateJWT,
 		),
 	)
+
+	mux.Handle(
+		"PUT /units",
+		manager.With(
+			http.HandlerFunc(h.UpdateUnit),
+			h.middlewares.RequireRole("admin"),
+			h.middlewares.AuthenticateJWT,
+		),
+	)
 	
 	mux.Handle(
 		"DELETE /units/{id}",
