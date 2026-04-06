@@ -94,9 +94,9 @@ const Property_Dashboard = () => {
                       <td className="py-3 px-4 text-black">{prop.address}</td>
                       <td className="py-3 px-4 text-black">{prop.city}</td>
                       <td className="py-3 px-4 text-black">{prop.number_of_floors}</td>
-                      <td className="py-3 px-4 text-black">{units.filter(u => u.property_id === prop.id).length}</td>
-                      <td className="py-3 px-4 text-black">{units.filter(u => u.property_id === prop.id && u.status === 'occupied').length}</td>
-                      <td className="py-3 px-4 text-black">{units.filter(u => u.property_id === prop.id && u.status === 'available').length}</td>
+                      <td className="py-3 px-4 text-black">{units.filter(u => u?.property_id === prop.id).length}</td>
+                      <td className="py-3 px-4 text-black">{units.filter(u => u?.property_id === prop.id && u.status === 'occupied').length}</td>
+                      <td className="py-3 px-4 text-black">{units.filter(u => u?.property_id === prop.id && u.status === 'available').length}</td>
                       <td className="py-3 px-4 font-bold text-black">৳{prop.base_rent.toLocaleString()}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-2">

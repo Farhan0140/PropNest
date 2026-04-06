@@ -16,9 +16,10 @@ const AddUnitForm = ({ onCloseButtonClick, defaultValues={}, isEdit=false }) => 
     reset(defaultValues);
   }, [defaultValues, reset]);
 
-  // TODO add updateUnit when backend api is created
   const { 
-    CreateUnit, 
+    units,
+    CreateUnit,
+    UpdateUnit, 
     setUnits, 
     isCreatingUnit, 
     properties 
@@ -32,24 +33,23 @@ const AddUnitForm = ({ onCloseButtonClick, defaultValues={}, isEdit=false }) => 
     { value: "available", label: "Available" },
     { value: "occupied", label: "Occupied" },
     { value: "maintenance", label: "Maintenance" },
-    { value: "reserved", label: "Reserved" },
   ];
 
   const onSubmit = async (data) => {
+    let res;
+    
     try {
-      let res;
-
       if(isEdit) {
-        // res = await UpdateUnit(data);
+        res = await UpdateUnit(data);
       } else {
         res = await CreateUnit(data);
       }
 
       if (res.response != null) {
         if(isEdit) {
-          setUnits((prev) => prev.map((u) => {
-            u.id === defaultValues.id ? res.response : u;
-          }));
+          setUnits((prev) => prev.map((u) => 
+            u.id === defaultValues.id ? res.response : u
+          ));
         } else {
           setUnits((prev) => [...prev, res.response]);
         }
@@ -77,13 +77,14 @@ const AddUnitForm = ({ onCloseButtonClick, defaultValues={}, isEdit=false }) => 
       <div className="grid gap-4">
         <div>
           <label className="block text-sm font-bold text-black mb-1">
-            * Property
+            { isEdit ? "Property" : "* Property"}
           </label>
           <select
             className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] focus:translate-x-0.5 focus:translate-y-0.5 transition-all cursor-pointer appearance-none"
             {...register("property_id", { required: "* This Field is Required" })}
             defaultValue=""
             style={{ color: '#000000' }}
+            disabled={isEdit}
           >
             <option value="" disabled className="text-black">
               Select Property

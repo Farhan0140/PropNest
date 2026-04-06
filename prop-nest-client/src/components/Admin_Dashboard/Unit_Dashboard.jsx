@@ -11,7 +11,6 @@ const Unit_Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUnit, setSelectedUnit] = useState(null);
 
-
   const openAddModal = () => {
     setSelectedUnit(null);
     setEditMode(false);
@@ -37,13 +36,13 @@ const Unit_Dashboard = () => {
 
 
   const filteredUnits = units.filter(unit => {
-    const prop = properties.find(p => p.id === unit.property_id);
+    const prop = properties.find(p => p.id === unit?.property_id);
     const query = searchQuery?.toLowerCase() || "";
     return (
-      unit.unit_name?.toLowerCase().includes(query) ||
+      unit?.unit_name?.toLowerCase().includes(query) ||
       (prop && prop?.house_name.toLowerCase().includes(query)) ||
-      (unit.renter_name && unit.renter_name?.toLowerCase().includes(query)) ||
-      unit.status.toLowerCase().includes(query)
+      (unit?.renter_name && unit.renter_name?.toLowerCase().includes(query)) ||
+      unit?.status.toLowerCase().includes(query)
     );
   });
 
@@ -59,6 +58,13 @@ const Unit_Dashboard = () => {
     });
     return Object.values(groups);
   }, [filteredUnits, properties]);
+
+  const statusStyles = {
+    occupied: 'bg-green-300',
+    available: 'bg-blue-300',
+    maintenance: 'bg-red-300',
+    reserved: 'bg-yellow-300',
+  };
 
   return (
     <div className="font-sans md:p-8">
@@ -91,7 +97,7 @@ const Unit_Dashboard = () => {
         <div className="space-y-8">
           {groupedUnits.length > 0 ? (
             groupedUnits.map(({ property, units: propUnits }) => (
-              <div key={property.id} className="mb-6">
+              <div key={property?.id} className="mb-6">
                 <div className="flex items-center space-x-3 mb-3 px-1">
                   <Building2 className="w-5 h-5 text-black" />
                   <h3 className="text-xl font-bold text-black">{property?.house_name || 'Unknown Property'}</h3>
@@ -119,8 +125,8 @@ const Unit_Dashboard = () => {
                             <td className="py-3 px-4 font-bold text-black">৳{unit.rent_amount}</td>
                             <td className="py-3 px-4">
                               <span className={`px-2 py-1 rounded text-xs font-bold border-2 border-black ${
-                                unit.status === 'occupied' ? 'bg-green-400 text-black' : 'bg-yellow-400 text-black'
-                              }`}>
+                                statusStyles[unit.status] || 'bg-gray-400'
+                              } text-black`}>
                                 {unit.status}
                               </span>
                             </td>
@@ -176,10 +182,10 @@ const Unit_Dashboard = () => {
                 isEdit={editMode}
                 defaultValues={
                   selectedUnit ? {
-                    id: Number(selectedUnit.id),
-                    property_id: Number(selectedUnit.property_id),
+                    id: selectedUnit.id,
+                    property_id: selectedUnit.property_id,
                     unit_name: selectedUnit.unit_name,
-                    rent_amount: Number(selectedUnit.rent_amount),
+                    rent_amount: selectedUnit.rent_amount,
                     status: selectedUnit.status,
                   } : {}
                 } 

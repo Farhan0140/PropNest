@@ -140,6 +140,35 @@ const useAdmin = () => {
     }
   }
 
+  const UpdateUnit = async(data) => {
+    setIsCreatingUnit(true);
+
+    try {
+      const res = await authApiClient.put("/units", {
+        property_id: Number(data.property_id),
+        id: Number(data.id),
+        unit_name: data.unit_name,
+        rent_amount: Number(data.rent_amount),
+        status: data.status,
+      });
+      console.log(res.data);
+      console.log("-> ", units);
+
+      return {
+        response: res.data,
+        message: "Unit Updated Successfully"
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        response: null,
+        message: "Something Went Wrong!"
+      }
+    } finally {
+      setIsCreatingUnit(false);
+    }
+  }
+
   return {
     properties,
     CreateProperty,
@@ -149,6 +178,7 @@ const useAdmin = () => {
 
     units,
     CreateUnit,
+    UpdateUnit,
     setUnits,
     isCreatingUnit
   };
