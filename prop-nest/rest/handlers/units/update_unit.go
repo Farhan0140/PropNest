@@ -10,6 +10,7 @@ import (
 
 type UnitUpdate struct {
 	Id         int     `json:"id"`
+	PropertyId int     `json:"property_id"`
 	UnitName   string  `json:"unit_name"`
 	RentAmount float64 `json:"rent_amount"`
 	Status     string  `json:"status"`
@@ -28,10 +29,11 @@ func (h *Handler) UpdateUnit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updatedUnit, err := h.unitRepo.Update(repo.Unit{
-		Id: newUpdatedUnit.Id,
-		UnitName: newUpdatedUnit.UnitName,
+		PropertyId: newUpdatedUnit.PropertyId,
+		Id:         newUpdatedUnit.Id,
+		UnitName:   newUpdatedUnit.UnitName,
 		RentAmount: newUpdatedUnit.RentAmount,
-		Status: newUpdatedUnit.Status,
+		Status:     newUpdatedUnit.Status,
 	}, ownerID)
 	if err != nil {
 		fmt.Println(err)
