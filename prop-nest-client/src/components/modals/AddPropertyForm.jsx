@@ -16,11 +16,12 @@ const AddPropertyForm = ({ onCloseButtonClick, defaultValues = {}, isEdit = fals
     reset(defaultValues);
   }, [defaultValues, reset]);
 
-  // TODO Add Update Property Context after making route in go server
   const { 
     CreateProperty, 
     setProperties, 
     isCreatingProperty, 
+
+    UpdateProperty,
   } = useAdminContext();
 
   const [isFailed, setIsFailed] = useState(false);
@@ -31,8 +32,7 @@ const AddPropertyForm = ({ onCloseButtonClick, defaultValues = {}, isEdit = fals
 
     try {
       if(isEdit) {
-        console.log(defaultValues);
-        // TODO call update property context
+        res = await UpdateProperty(data);
       } else {
         res = await CreateProperty(data);
       }
@@ -49,7 +49,7 @@ const AddPropertyForm = ({ onCloseButtonClick, defaultValues = {}, isEdit = fals
         console.log(res.response);
         setFailedMsg(res.message);
         setIsFailed(false);
-        setTimeout(() => onCloseButtonClick(), 2000);
+        setTimeout(() => onCloseButtonClick(), 1000);
       } else {
         setIsFailed(true);
         setFailedMsg(res.message);

@@ -47,7 +47,10 @@ const Side_Bar = () => {
       id: 1,
       label: 'Properties',
       icon: Building2,
-      to: 'property-dashboard',
+      submenus: {
+        properties: { label: 'Properties', path: 'property-dashboard' },
+        units: { label: 'Units', path: 'unit-dashboard' },
+      }
     },
     {
       id: 2,

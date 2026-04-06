@@ -1,15 +1,28 @@
 import { useForm } from "react-hook-form";
 import useAdminContext from "../../hooks/Admin/useAdminContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const AddUnitForm = ({ onCloseButtonClick }) => {
+const AddUnitForm = ({ onCloseButtonClick, defaultValues={}, isEdit=false }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+    reset,
+  } = useForm({
+    defaultValues,
+  });
 
-  const { CreateUnit, setUnits, isCreatingUnit, properties } = useAdminContext();
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
+
+  // TODO add updateUnit when backend api is created
+  const { 
+    CreateUnit, 
+    setUnits, 
+    isCreatingUnit, 
+    properties 
+  } = useAdminContext();
 
   const [isFailed, setIsFailed] = useState(false);
   const [failedMsg, setFailedMsg] = useState("");
@@ -24,14 +37,27 @@ const AddUnitForm = ({ onCloseButtonClick }) => {
 
   const onSubmit = async (data) => {
     try {
-      const res = await CreateUnit(data);
+      let res;
+
+      if(isEdit) {
+        // res = await UpdateUnit(data);
+      } else {
+        res = await CreateUnit(data);
+      }
 
       if (res.response != null) {
-        setUnits((prev) => [...prev, res.response]);
+        if(isEdit) {
+          setUnits((prev) => prev.map((u) => {
+            u.id === defaultValues.id ? res.response : u;
+          }));
+        } else {
+          setUnits((prev) => [...prev, res.response]);
+        }
+
         console.log(res.response);
         setFailedMsg(res.message);
         setIsFailed(false);
-        setTimeout(() => onCloseButtonClick(), 2000);
+        setTimeout(() => onCloseButtonClick(), 1000);
       } else {
         setIsFailed(true);
         setFailedMsg(res.message);
@@ -39,7 +65,7 @@ const AddUnitForm = ({ onCloseButtonClick }) => {
     } catch (error) {
       console.log(error);
       setIsFailed(true);
-      setFailedMsg("An error occurred while creating the unit");
+      setFailedMsg("Something Went Wrong!!");
     }
   };
 
@@ -195,7 +221,7 @@ const AddUnitForm = ({ onCloseButtonClick }) => {
               Saving...
             </span>
           ) : (
-            "Save"
+              isEdit ? "Update" : "Save"
           )}
         </button>
       </div>

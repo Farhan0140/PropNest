@@ -41,7 +41,7 @@ const useAdmin = () => {
   }, [authToken]);
 
 
-  // Property Creation Part
+  // ________________________ For Property __________________________________ 
 
   const [isCreatingProperty, setIsCreatingProperty] = useState(false);  // For Loading Animation
 
@@ -75,8 +75,43 @@ const useAdmin = () => {
       setIsCreatingProperty(false);
     }
   }
+
+  const UpdateProperty = async(data) => {
+    setIsCreatingProperty(true);
+
+    try {
+      const res = await authApiClient.put("/properties", {
+        id: data.id,
+        house_name: data.house_name,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postal_code,
+        number_of_floors: Number(data.number_of_floors),
+        total_units: Number(data.total_units),
+        base_rent: Number(data.base_rent)
+      })
+
+      console.log(res.data);
+      return {
+        response: res.data,
+        message: "Property Updated Successfully"
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        response: null,
+        message: "Something Went Wrong!"
+      }
+    } finally {
+      setIsCreatingProperty(false);
+    }
+  }
     
-  const [isCreatingUnit, setIsCreatingUnit] = useState(false);
+
+  // ____________________ For Unit _________________________
+
+
+  const [isCreatingUnit, setIsCreatingUnit] = useState(false);  // For Loading Animation
   const CreateUnit = async(data) => {
     setIsCreatingUnit(true);
 
@@ -108,12 +143,13 @@ const useAdmin = () => {
   return {
     properties,
     CreateProperty,
+    UpdateProperty,
     setProperties,
     isCreatingProperty,
 
     units,
-    setUnits,
     CreateUnit,
+    setUnits,
     isCreatingUnit
   };
 };

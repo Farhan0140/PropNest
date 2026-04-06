@@ -28,6 +28,7 @@ const Property_Dashboard = () => {
     setEditMode(false);
   };
 
+  // TODO make it workable by using api
   const handleDelete = (id) => {
     setProperties(properties.filter(p => p.id !== id));
   };
