@@ -1,24 +1,24 @@
 package propertyinfo
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"propnest/util"
-	"strconv"
 )
+
+type PropertyID struct {
+	Id int `json:"id"`
+}
 
 func (h *Handler) DeleteProperty(w http.ResponseWriter, r *http.Request) {
 	owner_id := r.Context().Value("userID").(int)
+	var propID PropertyID
+	
+	decoder := json.NewDecoder(r.Body)
+	decoder.Decode(&propID)
 
-	property_id := r.PathValue("id")
-	propertyId, err := strconv.Atoi(property_id)
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	err = h.propInfoRepo.Delete(propertyId, owner_id)
+	err := h.propInfoRepo.Delete(propID.Id, owner_id)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

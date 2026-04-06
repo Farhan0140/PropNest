@@ -34,7 +34,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 	)
 	
 	mux.Handle(
-		"DELETE /units/{id}",
+		"DELETE /units",
 		manager.With(
 			http.HandlerFunc(h.DeleteUnit),
 			h.middlewares.RequireRole("admin"),
