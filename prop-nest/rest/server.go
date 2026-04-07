@@ -6,6 +6,7 @@ import (
 	"os"
 	"propnest/config"
 	property "propnest/rest/handlers/property"
+	"propnest/rest/handlers/renter"
 	units "propnest/rest/handlers/units"
 	"propnest/rest/handlers/user"
 	"propnest/rest/middlewares"
@@ -17,6 +18,7 @@ type Server struct {
 	userHandler     *user.Handler
 	propertyHandler *property.Handler
 	unitHandler     *units.Handler
+	renterHandler   *renter.Handler
 }
 
 func NewServer(
@@ -24,12 +26,14 @@ func NewServer(
 	userHandler *user.Handler,
 	propertyHandler *property.Handler,
 	unitHandler *units.Handler,
+	renterHandler *renter.Handler,
 ) *Server {
 	return &Server{
 		cnf:             cnf,
 		userHandler:     userHandler,
 		propertyHandler: propertyHandler,
 		unitHandler:     unitHandler,
+		renterHandler: renterHandler,
 	}
 }
 
@@ -47,6 +51,7 @@ func (server *Server) Start() {
 	server.userHandler.RegisterRoutes(mux, manager)
 	server.propertyHandler.RegisterRoutes(mux, manager)
 	server.unitHandler.RegisterRoutes(mux, manager)
+	server.renterHandler.RegisterRoutes(mux, manager)
 
 	addr := ":" + strconv.Itoa(server.cnf.HttpPort)
 	fmt.Println("Server is Running on port ", addr)
