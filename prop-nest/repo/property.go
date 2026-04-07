@@ -86,7 +86,7 @@ func (r *propertyInfoRepo) Create(propInfo PropertyInfo) (*PropertyInfo, error) 
 				"property_id": property_id,
 				"unit_name": unitName,
 				"rent_amount": propInfo.BaseRent,
-				"status": "vacant",
+				"status": "available",
 			})
 		}
 	}
