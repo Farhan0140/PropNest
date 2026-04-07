@@ -4,7 +4,7 @@ import AddPropertyForm from '../modals/AddPropertyForm';
 import useAdminContext from '../../hooks/Admin/useAdminContext';
 
 const Property_Dashboard = () => {
-  const { properties, setProperties, units } = useAdminContext();
+  const { properties, setProperties, DeleteProperty, units, isDeleting } = useAdminContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -28,9 +28,20 @@ const Property_Dashboard = () => {
     setEditMode(false);
   };
 
-  // TODO make it workable by using api
-  const handleDelete = (id) => {
-    setProperties(properties.filter(p => p.id !== id));
+  const handleDelete = async(id) => {
+    if(!window.confirm("Are you sure, you want delete this property?")) return;
+    
+    try {
+      const res = await DeleteProperty(id);
+      if(res.success) {
+        window.alert(res.message);
+        setProperties(properties.filter(p => p.id !== id));
+      } else {
+        window.alert(res.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const filteredProperties = properties.filter(prop =>
@@ -108,9 +119,12 @@ const Property_Dashboard = () => {
                           </button>
                           <button
                             onClick={() => handleDelete(prop.id)}
-                            className="bg-red-400 border-2 border-black rounded px-2 py-1 text-sm font-medium text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                            disabled={isDeleting}
+                            className={`bg-red-400 ${isDeleting && "bg-white"} border-2 border-black rounded px-2 py-1 text-sm font-medium text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all`}
                           >
-                            <Trash2 className="w-3 h-3" />
+                            {
+                              isDeleting ? <span className="loading loading-spinner loading-xs"></span> : <Trash2 className="w-3 h-3" />
+                            }
                           </button>
                         </div>
                       </td>

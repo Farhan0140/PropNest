@@ -54,12 +54,12 @@ const Side_Bar = () => {
     },
     {
       id: 2,
-      label: 'Tenants',
+      label: 'Renter',
       icon: Users,
       submenus: {
-        tenantList: { label: 'Tenant List', path: '/tenants/list' },
-        addTenant: { label: 'Add Tenant', path: '/tenants/add' },
-        tenantRequests: { label: 'Tenant Requests', path: '/tenants/requests' }
+        tenantList: { label: 'Renter List', path: '/tenants/list' },
+        addTenant: { label: 'Add Renter', path: '/tenants/add' },
+        tenantRequests: { label: 'Renter Requests', path: '/tenants/requests' }
       }
     },
     {

@@ -106,6 +106,32 @@ const useAdmin = () => {
       setIsCreatingProperty(false);
     }
   }
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const DeleteProperty = async(data) => {
+    setIsDeleting(true);
+
+    try {
+      const res = await authApiClient.delete("/properties", {
+        data: { id: Number(data) }
+      });
+
+      if(res.status === 200 || res.status === 204) {
+        return {
+          success: true,
+          message: "Property Deleted Successfully"
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: "Something Went Wrong!!"
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  }
     
 
   // ____________________ For Unit _________________________
@@ -169,18 +195,47 @@ const useAdmin = () => {
     }
   }
 
+  const DeleteUnit = async(data) => {
+    setIsDeleting(true);
+
+    try {
+      const res = await authApiClient.delete("/units", {
+        data: { id: Number(data) }
+      });
+
+      if(res.status === 200 || res.status === 204) {
+        return {
+          success: true,
+          message: "Unit Deleted Successfully"
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: "Something Went Wrong!!"
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return {
     properties,
     CreateProperty,
     UpdateProperty,
+    DeleteProperty,
     setProperties,
     isCreatingProperty,
 
     units,
     CreateUnit,
     UpdateUnit,
+    DeleteUnit,
     setUnits,
-    isCreatingUnit
+    isCreatingUnit,
+
+    isDeleting,
   };
 };
 
