@@ -12,7 +12,7 @@ import (
 type User struct {
 	ID        int    `json:"id"`
 	Full_Name string `json:"full_name"`
-	Email     string `json:"email"`
+	Email_OR_Nid     string `json:"email_or_nid"`
 	Password  string `json:"password"`
 }
 
@@ -29,7 +29,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	createdUser, err := h.userRepo.Create(repo.User{
 		Full_Name: newUser.Full_Name,
-		Email: newUser.Email,
+		Email_OR_Nid: newUser.Email_OR_Nid,
 		Password: newUser.Password,
 	})
 	if err != nil {

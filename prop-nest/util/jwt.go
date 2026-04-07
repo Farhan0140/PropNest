@@ -9,14 +9,14 @@ import (
 type CustomClaims struct {
 	ID        int    `json:"id"`
 	Full_Name string `json:"full_name"`
-	Email     string `json:"email"`
+	Email_OR_Nid     string `json:"email_or_nid"`
 	Role      string `json:"role"`
 	jwt.RegisteredClaims
 }
 
 func CreateJWT(secret string, data CustomClaims) (string, error) {
 	data.RegisteredClaims = jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(72 * time.Hour)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}
 

@@ -8,7 +8,7 @@ import (
 )
 
 type requestLogin struct {
-	Email    string `json:"email" db:"email"`
+	Email_OR_Nid    string `json:"email_or_nid" db:"email_or_nid"`
 	Password string `json:"password" db:"password"`
 }
 
@@ -23,7 +23,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := h.userRepo.Find(reqLogin.Email, reqLogin.Password)
+	usr, err := h.userRepo.Find(reqLogin.Email_OR_Nid, reqLogin.Password)
 	if usr == nil {
 		http.Error(w, "Internal Server Error", http.StatusBadRequest)
 		return
@@ -37,7 +37,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	access_token, err := util.CreateJWT(h.cnf.SecretKey, util.CustomClaims{
 		ID:        usr.ID,
 		Full_Name: usr.Full_Name,
-		Email:     usr.Email,
+		Email_OR_Nid:     usr.Email_OR_Nid,
 		Role:      usr.Role,
 	})
 	if err != nil {

@@ -13,14 +13,14 @@ import (
 type User struct {
 	ID        int    `json:"id" db:"id"`
 	Full_Name string `json:"full_name" db:"full_name"`
-	Email     string `json:"email" db:"email"`
+	Email_OR_Nid     string `json:"email_or_nid" db:"email_or_nid"`
 	Password  string `json:"password" db:"password"`
 	Role      string `json:"role" db:"role"`
 }
 
 type UserRepo interface {
 	Create(user User) (*User, error)
-	Find(email, password string) (*User, error)
+	Find(email_or_nid, password string) (*User, error)
 }
 
 type userRepo struct {
@@ -48,7 +48,7 @@ func (r *userRepo) Create(user User) (*User, error) {
 	query := `
 		INSERT INTO users (
 			full_name,
-			email,
+			email_or_nid,
 			password
 		) VALUES (
 			$1,
@@ -58,7 +58,7 @@ func (r *userRepo) Create(user User) (*User, error) {
 		RETURNING id
 	`
 
-	row := r.db.QueryRow(query, user.Full_Name, user.Email, user.Password)
+	row := r.db.QueryRow(query, user.Full_Name, user.Email_OR_Nid, user.Password)
 	err = row.Scan(&user.ID)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
@@ -71,15 +71,15 @@ func (r *userRepo) Create(user User) (*User, error) {
 	return &user, nil
 }
 
-func (r *userRepo) Find(email, password string) (*User, error) {
+func (r *userRepo) Find(email_or_nid, password string) (*User, error) {
 	var user User
 	query := `
-		SELECT id, full_name, email, password, role
+		SELECT id, full_name, email_or_nid, password, role
 		FROM users
-		WHERE email = $1
+		WHERE email_or_nid = $1
 		LIMIT 1
 	`
-	err := r.db.Get(&user, query, email)
+	err := r.db.Get(&user, query, email_or_nid)
 	if err != nil {
 		fmt.Println(err)
 		if err == sql.ErrNoRows {
