@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS renters (
     status VARCHAR(10) DEFAULT 'active'
         CHECK (status IN ('active', 'left')),
 
+    date_of_birth DATE,
+
     move_in_date DATE DEFAULT CURRENT_DATE,
     move_out_date DATE,
 

@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -11,6 +13,7 @@ type Renter struct {
 	FullName    string `json:"full_name" db:"full_name"`
 	PhoneNumber string `json:"phone_number" db:"phone_number"`
 	NidNumber   string `json:"nid_number" db:"nid_number"`
+	DateOfBirth string `json:"date_of_birth" db:"date_of_birth"`
 	Status      string `json:"status" db:"status"`
 }
 
@@ -35,23 +38,55 @@ func (r *renterRepo) Create(renter Renter) (*Renter, error) {
 	}
 
 	defer tx.Rollback()
+
+	// First Check Given Unit is available or not
+	var exists bool
+
+	checking_query := `
+		SELECT EXISTS (
+			SELECT 1 FROM units
+			WHERE id = $1 AND status = 'available'
+		)
+	`
+	err = tx.QueryRow(checking_query, renter.UnitId).Scan(&exists)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, fmt.Errorf("Unit is already occupied!")
+	}
 	
+	// Creating Renter
 	renter_query := `
 		INSERT INTO renters (
 			unit_id, 
 			full_name, 
 			phone_number, 
-			nid_number
+			nid_number,
+			date_of_birth
 		) VALUES (
 			$1, 
 			$2, 
 			$3, 
-			$4
+			$4,
+			$5
 		)
 		RETURNING id
 	`
 	
-	err = tx.QueryRow(renter_query, renter.UnitId, renter.FullName, renter.PhoneNumber, renter.NidNumber).Scan(&renter.Id)
+	err = tx.QueryRow(renter_query, renter.UnitId, renter.FullName, renter.PhoneNumber, renter.NidNumber, renter.DateOfBirth).Scan(&renter.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update the unit available to occupied
+	unit_update_query := `
+		UPDATE units
+		SET 
+			status = 'occupied'
+		WHERE id = $1;
+	`
+	_, err = tx.Exec(unit_update_query, renter.UnitId)
 	if err != nil {
 		return nil, err
 	}
