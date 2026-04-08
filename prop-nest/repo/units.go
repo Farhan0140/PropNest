@@ -15,9 +15,18 @@ type Unit struct {
 	Status     string  `json:"status" db:"status"`
 }
 
+type UnitWithRenter struct {
+	PropertyId int     `json:"property_id" db:"property_id"`
+	Id         int     `json:"id" db:"id"`
+	UnitName   string  `json:"unit_name" db:"unit_name"`
+	RentAmount float64 `json:"rent_amount" db:"rent_amount"`
+	Status     string  `json:"status" db:"status"`
+	RenterName string  `json:"full_name" db:"full_name"`
+}
+
 type UnitRepo interface {
 	Create(unit Unit) (*Unit, error)
-	List(ownerId int) ([]*Unit, error)
+	List(ownerId int) ([]*UnitWithRenter, error)
 	Update(unit Unit, ownerID int) (*Unit, error)
 	Delete(unit_id int, ownerID int) error
 }
@@ -57,8 +66,8 @@ func (r *unitRepo) Create(unit Unit) (*Unit, error) {
 	return &unit, nil
 }
 
-func (r *unitRepo) List(ownerId int) ([]*Unit, error) {
-	var unitList []*Unit
+func (r *unitRepo) List(ownerId int) ([]*UnitWithRenter, error) {
+	var unitList []*UnitWithRenter
 
 	query := `
 		SELECT 
@@ -66,9 +75,11 @@ func (r *unitRepo) List(ownerId int) ([]*Unit, error) {
 			u.property_id,
 			u.unit_name, 
 			u.rent_amount, 
-			u.status
+			u.status,
+			COALESCE(r.full_name, '') AS full_name
 		FROM units AS u
 		JOIN properties p ON u.property_id = p.id
+		LEFT JOIN renters r ON u.id = r.unit_id
 		WHERE p.owner_id = $1
 	`
 

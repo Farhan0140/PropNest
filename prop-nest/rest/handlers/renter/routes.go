@@ -14,4 +14,13 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 			h.middlewares.AuthenticateJWT,
 		),
 	)
+
+	mux.Handle(
+		"GET /renter",
+		manager.With(
+			http.HandlerFunc(h.GetRenters),
+			h.middlewares.RequireRole("admin"),
+			h.middlewares.AuthenticateJWT,
+		),
+	)
 }

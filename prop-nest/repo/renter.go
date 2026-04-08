@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -17,8 +18,22 @@ type Renter struct {
 	Status      string `json:"status" db:"status"`
 }
 
+type RenterWithUnit struct {
+	Id          int    `db:"id" json:"id"`
+	UnitId      int    `db:"unit_id" json:"unit_id"`
+	FullName    string `db:"full_name" json:"full_name"`
+	PhoneNumber string `db:"phone_number" json:"phone_number"`
+	NidNumber   string `db:"nid_number" json:"nid_number"`
+	DateOfBirth string `db:"date_of_birth" json:"date_of_birth"`
+	Status      string `db:"status" json:"status"`
+
+	UnitName   string  `db:"unit_name" json:"unit_name"`
+	RentAmount float64 `db:"rent_amount" json:"rent_amount"`
+}
+
 type RenterRepo interface {
 	Create(renter Renter) (*Renter, error)
+	List() ([]*RenterWithUnit, error)
 }
 
 type renterRepo struct {
@@ -124,4 +139,35 @@ func (r *renterRepo) Create(renter Renter) (*Renter, error) {
 	}
 
 	return &renter, nil
+}
+
+func (r *renterRepo) List() ([]*RenterWithUnit, error) {
+	var renterList []*RenterWithUnit
+
+	query := `
+		SELECT 
+			r.id,
+			r.unit_id,
+			r.full_name,
+			r.phone_number,
+			r.nid_number,
+			r.status,
+			r.date_of_birth,
+			u.unit_name,
+			u.rent_amount
+		FROM renters as r
+		LEFT JOIN units AS u
+		ON r.unit_id = u.id 
+	`
+
+	err := r.db.Select(&renterList, query)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return renterList, nil
 }
