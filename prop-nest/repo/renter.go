@@ -20,20 +20,22 @@ type Renter struct {
 
 type RenterWithUnit struct {
 	Id          int    `db:"id" json:"id"`
-	UnitId      int    `db:"unit_id" json:"unit_id"`
+	UnitId      *int    `db:"unit_id" json:"unit_id"`
 	FullName    string `db:"full_name" json:"full_name"`
 	PhoneNumber string `db:"phone_number" json:"phone_number"`
 	NidNumber   string `db:"nid_number" json:"nid_number"`
 	DateOfBirth string `db:"date_of_birth" json:"date_of_birth"`
 	Status      string `db:"status" json:"status"`
 
-	UnitName   string  `db:"unit_name" json:"unit_name"`
-	RentAmount float64 `db:"rent_amount" json:"rent_amount"`
+	UnitName   *string  `db:"unit_name" json:"unit_name"`
+	RentAmount *float64 `db:"rent_amount" json:"rent_amount"`
 }
 
 type RenterRepo interface {
 	Create(renter Renter) (*Renter, error)
 	List() ([]*RenterWithUnit, error)
+	Update(renter Renter) (*Renter, error)
+	Delete(renterId int) error 
 }
 
 type renterRepo struct {
@@ -170,4 +172,147 @@ func (r *renterRepo) List() ([]*RenterWithUnit, error) {
 	}
 
 	return renterList, nil
+}
+
+func (r *renterRepo) Update(renter Renter) (*Renter, error) {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+
+	defer tx.Rollback()
+
+	var oldUnitId *int
+	findOldUnitId := `
+		SELECT unit_id FROM renters WHERE id = $1
+	`
+
+	// First Check Given Unit is available or not
+	var exists bool
+	checking_query := `
+		SELECT EXISTS (
+			SELECT 1 FROM units
+			WHERE id = $1 AND status = 'available'
+		)
+	`
+	err = tx.QueryRow(checking_query, renter.UnitId).Scan(&exists)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, fmt.Errorf("Unit is already occupied!")
+	}
+
+	err = tx.QueryRow(findOldUnitId, renter.Id).Scan(&oldUnitId)
+	if err != nil {
+		return nil, err
+	}
+
+	update_renter_query := `
+		UPDATE renters
+		SET 
+			unit_id = $1,
+			full_name = $2,
+			phone_number = $3,
+			nid_number = $4,
+			status = $5,
+			date_of_birth = $6
+		WHERE 
+			id = $7;
+	`
+	_, err = tx.Exec(update_renter_query, renter.UnitId, renter.FullName, renter.PhoneNumber, renter.NidNumber, renter.Status, renter.DateOfBirth, renter.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	// For unit occupied to available
+	update_unit_query_1 := `
+		UPDATE units
+		SET status = 'available'
+		WHERE id = $1
+	`
+	if oldUnitId != nil {
+		_, err = tx.Exec(update_unit_query_1, oldUnitId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Update the unit available to occupied
+	update_unit_query_2 := `
+		UPDATE units
+		SET 
+			status = 'occupied'
+		WHERE id = $1;
+	`
+	_, err = tx.Exec(update_unit_query_2, renter.UnitId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return &renter, nil
+}
+
+func (r *renterRepo) Delete(renterId int) error {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	var unitId *int
+	findUnitId := `
+		SELECT unit_id FROM renters WHERE id = $1
+	`
+	err = tx.QueryRow(findUnitId, renterId).Scan(&unitId)
+	if err != nil {
+		return err
+	}
+
+	// For unit occupied to available
+	update_unit_query_1 := `
+		UPDATE units
+		SET status = 'available'
+		WHERE id = $1
+	`
+	if unitId != nil {
+		_, err = tx.Exec(update_unit_query_1, unitId)
+		if err != nil {
+			return err
+		}
+	}
+
+
+	query := `
+		DELETE FROM renters
+		WHERE id = $1
+	`
+
+	result, err := tx.Exec(query, renterId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("Property not found")
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
 }

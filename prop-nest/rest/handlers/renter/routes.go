@@ -23,4 +23,22 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 			h.middlewares.AuthenticateJWT,
 		),
 	)
+
+	mux.Handle(
+		"PUT /renter",
+		manager.With(
+			http.HandlerFunc(h.UpdateRenter),
+			h.middlewares.RequireRole("admin"),
+			h.middlewares.AuthenticateJWT,
+		),
+	)
+	
+	mux.Handle(
+		"DELETE /renter",
+		manager.With(
+			http.HandlerFunc(h.DeleteRenter),
+			h.middlewares.RequireRole("admin"),
+			h.middlewares.AuthenticateJWT,
+		),
+	)
 }
