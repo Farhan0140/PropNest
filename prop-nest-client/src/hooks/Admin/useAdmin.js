@@ -5,6 +5,9 @@ import useAuthContext from "../Auth/useAuthContext";
 const useAdmin = () => {
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
+  const [renters, setRenters] = useState([]);
+
+  const [refreshUnits, setRefreshUnits] = useState(0);
 
   const {authToken} = useAuthContext();
   
@@ -38,8 +41,24 @@ const useAdmin = () => {
 
       }
     })();
-  }, [authToken]);
+  }, [authToken, refreshUnits, renters]);
+  
+  useEffect(() => {
+    (async() => {
+      try {
 
+        const res = await authApiClient.get("/renter");
+        console.log(res.data);
+        setRenters(res.data);
+      
+      } catch (error) {
+
+        console.log(error);
+
+      }
+    })();
+  }, [authToken]);
+  
 
   // ________________________ For Property __________________________________ 
 
@@ -59,6 +78,8 @@ const useAdmin = () => {
         base_rent: Number(data.base_rent),
         description: data.description
       });
+
+      setRefreshUnits(prev => prev + 1);
 
       return {
         response: res.data,
@@ -220,6 +241,97 @@ const useAdmin = () => {
     }
   }
 
+  const [isLoading, setIsLoading] = useState(false);
+
+
+
+  // _____________________ For Renters ____________________
+
+  const CreateRenter = async(data) => {
+    setIsLoading(true);
+    console.log(data);
+
+    try {
+      const res = await authApiClient.post("/renter", {
+        unit_id: Number(data.unit_id),
+        full_name: data.full_name,
+        phone_number: data.phone_number,
+        nid_number: data.nid_number,
+        status: data.status,
+        date_of_birth: data.date_of_birth
+      });
+
+      console.log(res.data);
+      return {
+        response: res.data,
+        message: "Renter Created Successfully",
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        response: null,
+        message: "Something Went Wrong!!",
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const UpdateRenter = async(data) => {
+    setIsLoading(true);
+    console.log(data);
+
+    try {
+      const res = await authApiClient.put("/renter", {
+        id: Number(data.id),
+        unit_id: Number(data.unit_id),
+        full_name: data.full_name,
+        phone_number: data.phone_number,
+        nid_number: data.nid_number,
+        date_of_birth: data.date_of_birth,
+        status: data.status
+      })
+      console.log(res.data);
+      return {
+        response: res.data,
+        message: "Renter Updated Successfully"
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        response: null,
+        message: "Something Went Wrong!!"
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const DeleteRenter = async(data) => {
+    setIsDeleting(true);
+
+    try {
+      const res = authApiClient.delete("/renter", {
+        data: {id: Number(data)}
+      });
+
+      console.log(res.data);
+
+      return {
+        success: true,
+        message: "Renter Deleted Successfully"
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: "Something Went Wrong!!"
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return {
     properties,
     CreateProperty,
@@ -234,6 +346,13 @@ const useAdmin = () => {
     DeleteUnit,
     setUnits,
     isCreatingUnit,
+
+    renters,
+    setRenters,
+    CreateRenter,
+    UpdateRenter,
+    DeleteRenter,
+    isLoading,
 
     isDeleting,
   };

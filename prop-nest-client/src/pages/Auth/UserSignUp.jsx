@@ -69,11 +69,11 @@ const UserSignUp = () => {
             )
           }
 
-          {/* Email Input */}
+          {/* Email Or NID Input */}
           <input 
-            type="email" 
-            placeholder="Email" 
-            name="email" 
+            type="text" 
+            placeholder="Email Or NID" 
+            name="email_or_nid" 
             className="
               w-full h-10 rounded 
               border-2 border-black bg-white 
@@ -83,11 +83,11 @@ const UserSignUp = () => {
               placeholder:text-gray-500 placeholder:opacity-80
               focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
             " 
-            {...register("email", {required: "* This Field is Required"})}
+            {...register("email_or_nid", {required: "* This Field is Required"})}
           />
           {
-            errors.email && (
-              <span className="text-red-500">{errors.email.message}</span>
+            errors.email_or_nid && (
+              <span className="text-red-500">{errors.email_or_nid.message}</span>
             )
           }
           

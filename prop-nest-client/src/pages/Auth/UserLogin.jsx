@@ -49,15 +49,15 @@ const UserLogin = () => {
 
           {
             loginErr && (
-              <span className='text-red-500'>Check Email, Password <br />Try again!!</span>
+              <span className='text-red-500'>Check Email, Nid, Password <br />Try again!!</span>
             )
           }
 
-          {/* Email Input */}
+          {/* Email And Nid Input */}
           <input 
-            type="email" 
-            placeholder="Email" 
-            name="email" 
+            type="text" 
+            placeholder="Email Or NID" 
+            name="email_or_nid" 
             className="
               w-full h-10 rounded 
               border-2 border-black bg-white 
@@ -68,12 +68,12 @@ const UserLogin = () => {
               focus:border-[#2d8cf0] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
             " 
             {
-              ...register("email", {required: "* This field is required"})
+              ...register("email_or_nid", {required: "* This field is required"})
             }
           />
           {
-            errors.email && (
-              <span className="text-red-500">{errors.email.message}</span>
+            errors.email_or_nid && (
+              <span className="text-red-500">{errors.email_or_nid.message}</span>
             )
           }
           

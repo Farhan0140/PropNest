@@ -37,7 +37,7 @@ const useAuth = () => {
     try {
       await apiClient.post("/users", {
         full_name: data.full_name,
-        email: data.email,
+        email_or_nid: data.email_or_nid,
         password: data.password
       });
       return {
@@ -67,7 +67,7 @@ const useAuth = () => {
     try {
 
       const response = await apiClient.post("/users/login", {
-        email: data.email,
+        email_or_nid: data.email_or_nid,
         password: data.password
       });
       setAuthToken(response?.data);

@@ -45,7 +45,7 @@ const Side_Bar = () => {
     },
     {
       id: 1,
-      label: 'Properties',
+      label: 'Property',
       icon: Building2,
       submenus: {
         properties: { label: 'Properties', path: 'property-dashboard' },
@@ -57,9 +57,9 @@ const Side_Bar = () => {
       label: 'Renter',
       icon: Users,
       submenus: {
-        tenantList: { label: 'Renter List', path: '/tenants/list' },
-        addTenant: { label: 'Add Renter', path: '/tenants/add' },
-        tenantRequests: { label: 'Renter Requests', path: '/tenants/requests' }
+        tenantList: { label: 'Renter List', path: 'renter-dashboard' },
+        currentRenters: {label: 'Current Renters', path: 'current-renter-dashboard'},
+        previousRenters: {label: 'Previous Renters', path: 'previous-renter-dashboard'}
       }
     },
     {

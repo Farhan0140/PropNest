@@ -4,7 +4,7 @@ import useAdminContext from '../../hooks/Admin/useAdminContext';
 import AddUnitForm from '../modals/AddUnitForm';
 
 const Unit_Dashboard = () => {
-  const { properties, units, setUnits, DeleteUnit, isDeleting } = useAdminContext();
+  const { properties, units, setUnits, DeleteUnit, renters, isDeleting } = useAdminContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -140,7 +140,7 @@ const Unit_Dashboard = () => {
                                 {unit.status}
                               </span>
                             </td>
-                            <td className="py-3 px-4 text-black">{unit.renter_name || '-'}</td>
+                            <td className="py-3 px-4 text-black">{renters.find((renter) => renter.unit_id === unit.id)?.full_name || '-'}</td>
                             <td className="py-3 px-4">
                               <div className="flex items-center space-x-2">
                                 <button
