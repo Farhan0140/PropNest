@@ -240,7 +240,7 @@ func (r *renterRepo) Update(renter Renter) (*Renter, error) {
 	var oldUnitId = oldRenter.UnitId
 
 	// First Check Given Unit is available or not
-	if oldUnitId != renter.UnitId {
+	if oldUnitId == nil || renter.UnitId == nil || *oldUnitId != *renter.UnitId {
 		var exists bool
 		checking_query := `
 			SELECT EXISTS (

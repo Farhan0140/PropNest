@@ -75,11 +75,9 @@ func (r *unitRepo) List(ownerId int) ([]*UnitWithRenter, error) {
 			u.property_id,
 			u.unit_name, 
 			u.rent_amount, 
-			u.status,
-			COALESCE(r.full_name, '') AS full_name
+			u.status
 		FROM units AS u
 		JOIN properties p ON u.property_id = p.id
-		LEFT JOIN renters r ON u.id = r.unit_id
 		WHERE p.owner_id = $1
 	`
 
