@@ -10,7 +10,7 @@ import (
 
 type Renter struct {
 	Id          int    `json:"id" db:"id"`
-	UnitId      int    `json:"unit_id" db:"unit_id"`
+	UnitId      *int    `json:"unit_id" db:"unit_id"`
 	FullName    string `json:"full_name" db:"full_name"`
 	PhoneNumber string `json:"phone_number" db:"phone_number"`
 	NidNumber   string `json:"nid_number" db:"nid_number"`
@@ -154,12 +154,8 @@ func (r *renterRepo) List() ([]*RenterWithUnit, error) {
 			r.phone_number,
 			r.nid_number,
 			r.status,
-			r.date_of_birth,
-			u.unit_name,
-			u.rent_amount
+			r.date_of_birth
 		FROM renters as r
-		LEFT JOIN units AS u
-		ON r.unit_id = u.id 
 	`
 
 	err := r.db.Select(&renterList, query)
@@ -181,31 +177,107 @@ func (r *renterRepo) Update(renter Renter) (*Renter, error) {
 	}
 
 	defer tx.Rollback()
+	
+	// If the renter status is 'left,' skipped the update process.
+	var oldRenter Renter
 
-	var oldUnitId *int
-	findOldUnitId := `
-		SELECT unit_id FROM renters WHERE id = $1
+	query := `
+		SELECT id, unit_id, full_name, phone_number, nid_number, date_of_birth, status
+		FROM renters
+		WHERE id = $1
 	`
+	err = tx.Get(&oldRenter, query, renter.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	
+	if oldRenter.Status == "left" && renter.Status == "left" {
+		return nil, fmt.Errorf("Update is'nt available for left renter")
+	}
+
+	// When a status changes from 'active' to 'left,' trigger a renter update and set the unit status to 'Available
+	if oldRenter.Status == "active" && renter.Status == "left" {
+		// For unit occupied to available
+		update_unit_query_1 := `
+			UPDATE units
+			SET status = 'available'
+			WHERE id = $1
+		`
+
+		_, err = tx.Exec(update_unit_query_1, renter.UnitId)
+		if err != nil {
+			return nil, err
+		}
+
+		update_renter_query := `
+			UPDATE renters
+			SET 
+				unit_id = NULL,
+				full_name = $1,
+				phone_number = $2,
+				nid_number = $3,
+				status = $4,
+				date_of_birth = $5
+			WHERE 
+				id = $6;
+		`
+		_, err = tx.Exec(update_renter_query, renter.FullName, renter.PhoneNumber, renter.NidNumber, renter.Status, renter.DateOfBirth, renter.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := tx.Commit(); err != nil {
+			return nil, err
+		}
+
+		return &renter, nil
+	}
+
+
+	// If both the previous and new statuses are 'Active,' update the entire table
+
+	var oldUnitId = oldRenter.UnitId
 
 	// First Check Given Unit is available or not
-	var exists bool
-	checking_query := `
-		SELECT EXISTS (
-			SELECT 1 FROM units
-			WHERE id = $1 AND status = 'available'
-		)
-	`
-	err = tx.QueryRow(checking_query, renter.UnitId).Scan(&exists)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, fmt.Errorf("Unit is already occupied!")
-	}
+	if oldUnitId != renter.UnitId {
+		var exists bool
+		checking_query := `
+			SELECT EXISTS (
+				SELECT 1 FROM units
+				WHERE id = $1 AND status = 'available'
+			)
+		`
+		err = tx.QueryRow(checking_query, renter.UnitId).Scan(&exists)
+		if err != nil {
+			return nil, err
+		}
+		if !exists {
+			return nil, fmt.Errorf("Unit is already occupied!")
+		}
 
-	err = tx.QueryRow(findOldUnitId, renter.Id).Scan(&oldUnitId)
-	if err != nil {
-		return nil, err
+		// For unit occupied to available
+		update_unit_query_1 := `
+			UPDATE units
+			SET status = 'available'
+			WHERE id = $1
+		`
+		_, err = tx.Exec(update_unit_query_1, oldUnitId)
+		if err != nil {
+			return nil, err
+		}
+
+		// Update the unit available to occupied
+		update_unit_query_2 := `
+			UPDATE units
+			SET 
+				status = 'occupied'
+			WHERE id = $1;
+		`
+		_, err = tx.Exec(update_unit_query_2, renter.UnitId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	update_renter_query := `
@@ -225,31 +297,7 @@ func (r *renterRepo) Update(renter Renter) (*Renter, error) {
 		return nil, err
 	}
 
-	// For unit occupied to available
-	update_unit_query_1 := `
-		UPDATE units
-		SET status = 'available'
-		WHERE id = $1
-	`
-	if oldUnitId != nil {
-		_, err = tx.Exec(update_unit_query_1, oldUnitId)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Update the unit available to occupied
-	update_unit_query_2 := `
-		UPDATE units
-		SET 
-			status = 'occupied'
-		WHERE id = $1;
-	`
-	_, err = tx.Exec(update_unit_query_2, renter.UnitId)
-	if err != nil {
-		return nil, err
-	}
-
+	
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -308,7 +356,7 @@ func (r *renterRepo) Delete(renterId int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("Property not found")
+		return fmt.Errorf("Renter not found")
 	}
 
 	if err := tx.Commit(); err != nil {

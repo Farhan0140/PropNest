@@ -10,7 +10,7 @@ import (
 
 type UpdateRenter struct {
 	Id          int    `json:"id"`
-	UnitId      int    `json:"unit_id"`
+	UnitId      *int    `json:"unit_id"`
 	FullName    string `json:"full_name"`
 	PhoneNumber string `json:"phone_number"`
 	NidNumber   string `json:"nid_number"`
@@ -20,7 +20,7 @@ type UpdateRenter struct {
 
 func (h *Handler) UpdateRenter(w http.ResponseWriter, r *http.Request) {
 	var updatedRenterInfo UpdateRenter
-
+	
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&updatedRenterInfo)
 	if err != nil {
@@ -28,7 +28,9 @@ func (h *Handler) UpdateRenter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid Request Data", http.StatusBadRequest)
 		return
 	}
-
+	
+	fmt.Println(updatedRenterInfo)
+	
 	updatedRenter, err := h.renterRepo.Update(repo.Renter{
 		Id: updatedRenterInfo.Id,
 		UnitId: updatedRenterInfo.UnitId,
