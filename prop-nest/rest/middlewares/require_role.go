@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"propnest/util"
 )
 
 func (m *Middleware) RequireRole(roles ...string) Middlewares {
@@ -13,7 +14,9 @@ func (m *Middleware) RequireRole(roles ...string) Middlewares {
 			role := r.Context().Value("role")
 
 			if role == nil {
-				http.Error(w, "Forbidden", http.StatusForbidden)
+				util.SendError(w, map[string]string{
+					"error": "Forbidden",
+				}, http.StatusForbidden)
 				return
 			}
 
@@ -27,8 +30,9 @@ func (m *Middleware) RequireRole(roles ...string) Middlewares {
 				}
 			}
 
-			http.Error(w, "Access Denied", http.StatusForbidden)
-
+			util.SendError(w, map[string]string{
+				"error": "Access Denied",
+			}, http.StatusForbidden)
 		})
 	}
 }

@@ -19,20 +19,24 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&reqLogin)
 	if err != nil {
 		fmt.Println(err)
-		util.SendError(w, "Invalid Request Data", http.StatusBadRequest)
-		http.Error(w, "Invalid Request Data", http.StatusBadRequest)
+		util.SendError(w, map[string]string{
+			"error": "Invalid Request Data",
+		}, http.StatusBadRequest)
 		return
 	}
 
 	usr, err := h.userRepo.Find(reqLogin.Email_OR_Nid, reqLogin.Password)
 	if usr == nil {
-		http.Error(w, "Internal Server Error", http.StatusBadRequest)
+		util.SendError(w, map[string]string{
+			"error": "Internal Server Error",
+		}, http.StatusBadRequest)
 		return
 	}
 	if err != nil {
 		fmt.Println(err)
-		util.SendError(w, "Internal Server Error", http.StatusInternalServerError)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		util.SendError(w, map[string]string{
+			"error": "Internal Server Error",
+		}, http.StatusInternalServerError)
 		return
 	}
 
@@ -43,7 +47,9 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		Role:      usr.Role,
 	})
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		util.SendError(w, map[string]string{
+			"error": "Internal Server Error",
+		}, http.StatusInternalServerError)
 		return
 	}
 

@@ -8,6 +8,7 @@ import (
 	"propnest/repo"
 	"propnest/rest"
 	"propnest/rest/handlers/bills"
+	"propnest/rest/handlers/electricity"
 	property "propnest/rest/handlers/property"
 	"propnest/rest/handlers/renter"
 	units "propnest/rest/handlers/units"
@@ -36,12 +37,14 @@ func Serve() {
 	unitRepo := repo.NewUnitRepo(dbCon)
 	renterRepo := repo.NewRenterRepo(dbCon)
 	billsRepo := repo.NewBillsRepo(dbCon)
+	electricityRepo := repo.NewElectricityRepo(dbCon)
 
 	userHandler := user.NewHandler(cnf, userRepo, middlewares)
 	propertyHandler := property.NewHandler(middlewares, propertyRepo)
 	unitHandler := units.NewHandler(middlewares, unitRepo);
 	renterHandler := renter.NewHandler(middlewares, renterRepo)
 	billsHandler := bills.NewHandler(middlewares, billsRepo)
+	electricityHandler := electricity.NewHandler(middlewares, electricityRepo)
 	
 	server := rest.NewServer(
 		cnf,
@@ -50,6 +53,7 @@ func Serve() {
 		unitHandler,
 		renterHandler,
 		billsHandler,
+		electricityHandler,
 	)
 	server.Start()
 }

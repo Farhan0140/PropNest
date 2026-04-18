@@ -1,4 +1,4 @@
-package renter
+package electricity
 
 import (
 	"encoding/json"
@@ -7,14 +7,15 @@ import (
 	"propnest/util"
 )
 
-type renterID struct {
-	Id int `json:"id"`
+type UnitID struct {
+	UnitId int `json:"unit_id"`
 }
 
-func (h *Handler) DeleteRenter(w http.ResponseWriter, r *http.Request) {
-	var renterId renterID
+func (h *Handler) GetPreviousUnitHistory(w http.ResponseWriter, r *http.Request) {
+	var unitId UnitID
+
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&renterId)
+	err := decoder.Decode(&unitId)
 	if err != nil {
 		fmt.Println(err)
 		util.SendError(w, map[string]string{
@@ -23,7 +24,7 @@ func (h *Handler) DeleteRenter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.renterRepo.Delete(renterId.Id)
+	historyLst, err := h.electricityRepo.List(unitId.UnitId)
 	if err != nil {
 		fmt.Println(err)
 		util.SendError(w, map[string]string{
@@ -32,5 +33,5 @@ func (h *Handler) DeleteRenter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.SendData(w, "Renter Deleted Successfully!", http.StatusOK)
+	util.SendData(w, historyLst, http.StatusOK)
 }

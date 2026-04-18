@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS electricity_readings (
 
     unit_id INTEGER NOT NULL,
 
-    reading_date DATE NOT NULL,
+    year INT NOT NULL,
+    month INT NOT NULL,
     reading_value NUMERIC(10,2) NOT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -14,5 +15,5 @@ CREATE TABLE IF NOT EXISTS electricity_readings (
         REFERENCES units(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT unique_unit_date UNIQUE (unit_id, reading_date)
+    CONSTRAINT unique_unit_date UNIQUE (unit_id, year, month)
 );

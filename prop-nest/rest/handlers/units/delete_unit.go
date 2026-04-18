@@ -21,8 +21,9 @@ func (h *Handler) DeleteUnit(w http.ResponseWriter, r *http.Request) {
 	err := h.unitRepo.Delete(newUnit.Id, userId)
 	if err != nil {
 		fmt.Println(err)
-		util.SendError(w, "Internal Server Error", http.StatusInternalServerError)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		util.SendError(w, map[string]string{
+			"error": "Internal Server Error",
+		}, http.StatusInternalServerError)
 		return
 	}
 

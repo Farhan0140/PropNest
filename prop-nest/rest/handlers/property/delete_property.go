@@ -21,8 +21,9 @@ func (h *Handler) DeleteProperty(w http.ResponseWriter, r *http.Request) {
 	err := h.propInfoRepo.Delete(propID.Id, owner_id)
 	if err != nil {
 		fmt.Println(err)
-		util.SendError(w, "Internal Server Error", http.StatusInternalServerError)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		util.SendError(w, map[string]string{
+			"error": "Internal Server Error",
+		}, http.StatusInternalServerError)
 		return
 	}
 

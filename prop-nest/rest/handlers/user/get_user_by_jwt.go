@@ -10,13 +10,17 @@ func (h *Handler) GetUserByJWT(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 	authToken := strings.Split(authHeader, " ")
 	if len(authToken) != 2 || authToken[0] != "JWT" {
-		http.Error(w, "Unauthorize", http.StatusUnauthorized)
+		util.SendError(w, map[string]string{
+			"error": "Unauthorize",
+		}, http.StatusUnauthorized)
 		return
 	}
 
 	claims, err := util.VerifyJWT(h.cnf.SecretKey, authToken[1])
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		util.SendError(w, map[string]string{
+			"error": "Internal Server Error",
+		}, http.StatusInternalServerError)
 		return
 	}
 
