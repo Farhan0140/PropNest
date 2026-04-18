@@ -48,6 +48,11 @@ const Main_Dashboard = () => {
     <div className="min-h-screen bg-gray-200 font-sans p-0.5 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
+        <div className="mb-2">
+          <h1 className="text-3xl font-bold text-black mb-2">Dashboard</h1>
+          <p className="text-gray-600 text-lg">Welcome back! Here's an overview of your properties.</p>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, index) => (
@@ -135,13 +140,13 @@ const Main_Dashboard = () => {
               </button>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4 overflow-y-auto">
               {modalType === 'addProperty' && (
                 <AddPropertyForm onCloseButtonClick={closeModal} />
               )}
 
               {modalType === 'addUnit' && (
-                <AddUnitForm onCloseButtonClick={closeModal} />
+                  <AddUnitForm onCloseButtonClick={closeModal} isEdit={false} />
               )}
               
               {/* // TODO Here are more work to do  */}

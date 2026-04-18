@@ -64,6 +64,14 @@ const Side_Bar = () => {
     },
     {
       id: 3,
+      label: 'Rent History',
+      icon:  Building2,
+      submenus: {
+        allRents: {label: 'All Rents', path: 'rent-management-dashboard'},
+      }
+    },
+    {
+      id: 4,
       label: 'Payments',
       icon: CreditCard,
       submenus: {
@@ -73,7 +81,7 @@ const Side_Bar = () => {
       }
     },
     {
-      id: 4,
+      id: 5,
       label: 'Settings',
       icon: Settings,
       submenus: {

@@ -79,6 +79,11 @@ const Unit_Dashboard = () => {
   return (
     <div className="font-sans md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
+
+        <div className="mb-2">
+          <h1 className="text-3xl font-bold text-black mb-2">Unit Management</h1>
+          <p className="text-gray-600 text-lg">Manage all units</p>
+        </div>
         
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="w-full md:w-auto">

@@ -12,6 +12,7 @@ import Unit_Dashboard from "../components/Admin_Dashboard/Unit_Dashboard.jsx";
 import Renter_Dashboard from "../components/Admin_Dashboard/Renter_Dashboard.jsx";
 import Current_Renter_Dashboard from "../components/Admin_Dashboard/Current_Renter_Dashboard.jsx";
 import Previous_Renter_Dashboard from "../components/Admin_Dashboard/Previous_Renter_Dashboard.jsx";
+import Rent_Management_Dashboard from "../components/Admin_Dashboard/Rent_Management_Dashboard.jsx";
 
 const AppRoutes = () => {
   return (
@@ -35,6 +36,7 @@ const AppRoutes = () => {
         <Route path="renter-dashboard" element={<Renter_Dashboard />} />
         <Route path="current-renter-dashboard" element={<Current_Renter_Dashboard />} />
         <Route path="previous-renter-dashboard" element={<Previous_Renter_Dashboard />} />
+        <Route path="rent-management-dashboard" element={<Rent_Management_Dashboard />} />
       </Route>
       
     </Routes>
