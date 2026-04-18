@@ -13,6 +13,7 @@ import Renter_Dashboard from "../components/Admin_Dashboard/Renter_Dashboard.jsx
 import Current_Renter_Dashboard from "../components/Admin_Dashboard/Current_Renter_Dashboard.jsx";
 import Previous_Renter_Dashboard from "../components/Admin_Dashboard/Previous_Renter_Dashboard.jsx";
 import Rent_Management_Dashboard from "../components/Admin_Dashboard/Rent_Management_Dashboard.jsx";
+import Electricity_Bill_Dashboard from "../components/Bills_Dashboard/electricity_bill_dashboard.jsx";
 
 const AppRoutes = () => {
   return (
@@ -37,6 +38,7 @@ const AppRoutes = () => {
         <Route path="current-renter-dashboard" element={<Current_Renter_Dashboard />} />
         <Route path="previous-renter-dashboard" element={<Previous_Renter_Dashboard />} />
         <Route path="rent-management-dashboard" element={<Rent_Management_Dashboard />} />
+        <Route path="electricity-dashboard" element={<Electricity_Bill_Dashboard />} />
       </Route>
       
     </Routes>

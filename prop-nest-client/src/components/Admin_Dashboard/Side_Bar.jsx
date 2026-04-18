@@ -9,6 +9,7 @@ import {
   ChevronDown,
   LayoutDashboard,
   Bell,
+  Receipt,
 } from 'lucide-react';
 import { Link, Outlet, useNavigate } from 'react-router';
 import useAuthContext from '../../hooks/Auth/useAuthContext';
@@ -64,6 +65,17 @@ const Side_Bar = () => {
     },
     {
       id: 3,
+      label: 'Bills',
+      icon: Receipt,
+      submenus: {
+        electricity: { label: 'Electricity', path: 'electricity-dashboard' },
+        gas: { label: 'Gas', path: '/payments/invoices' },
+        water: { label: 'Water', path: '/payments/settings' },
+        others: { label: 'Others', path: '/payments/settings' }
+      }
+    },
+    {
+      id: 4,
       label: 'Rent History',
       icon:  Building2,
       submenus: {
@@ -71,7 +83,7 @@ const Side_Bar = () => {
       }
     },
     {
-      id: 4,
+      id: 5,
       label: 'Payments',
       icon: CreditCard,
       submenus: {
@@ -81,7 +93,7 @@ const Side_Bar = () => {
       }
     },
     {
-      id: 5,
+      id: 6,
       label: 'Settings',
       icon: Settings,
       submenus: {
