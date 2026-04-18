@@ -12,7 +12,7 @@ func (h *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
 	unitList, err := h.unitRepo.List(ownerId)
 	if err != nil {
 		fmt.Println(err)
-
+		util.SendError(w, "Internal Server Error", http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

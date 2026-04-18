@@ -24,7 +24,8 @@ func (h *Handler) CreateRenter(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&newRenter)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Invalid Data", http.StatusBadRequest)
+		util.SendError(w, "Invalid Request Data", http.StatusBadRequest)
+		http.Error(w, "Invalid Request Data", http.StatusBadRequest)
 		return
 	}
 
@@ -38,6 +39,7 @@ func (h *Handler) CreateRenter(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		fmt.Println(err)
+		util.SendError(w, "Internal Server Error", http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

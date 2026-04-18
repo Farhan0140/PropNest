@@ -22,6 +22,7 @@ func (h *Handler) CreateUnit(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&newUnit)
 	if err != nil {
 		fmt.Println(err)
+		util.SendError(w, "Invalid Request Data", http.StatusBadRequest)
 		http.Error(w, "Invalid Request Data", http.StatusBadRequest)
 		return
 	}
@@ -34,6 +35,7 @@ func (h *Handler) CreateUnit(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		fmt.Println(err)
+		util.SendError(w, "Internal Server Error", http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

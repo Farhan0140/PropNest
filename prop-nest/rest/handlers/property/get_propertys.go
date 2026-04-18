@@ -12,7 +12,7 @@ func (h *Handler) GetPropertyList(w http.ResponseWriter, r *http.Request) {
 	propertyLst, err := h.propInfoRepo.List(ownerId)
 	if err != nil {
 		fmt.Println(err)
-
+		util.SendError(w, "Internal Server Error", http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

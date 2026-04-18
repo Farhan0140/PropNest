@@ -11,11 +11,11 @@ type Handler struct {
 }
 
 func NewHandler(
-	middlewares middlewares.Middleware,
+	middlewares *middlewares.Middleware,
 	renterRepo repo.RenterRepo,
 ) *Handler {
 	return &Handler{
-		middlewares: &middlewares,
+		middlewares: middlewares,
 		renterRepo: renterRepo,
 	}
 }

@@ -23,6 +23,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&newUser)
 	if err != nil {
 		fmt.Println(err)
+		util.SendError(w, "Invalid Request Data", http.StatusBadRequest)
 		http.Error(w, "Invalid Request Data", http.StatusBadRequest)
 		return
 	}
@@ -34,12 +35,13 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		fmt.Println(err)
-		
 		if errors.Is(err, repo.ErrUserExists) {
+			util.SendError(w, "User already exists with this email", http.StatusInternalServerError)
 			http.Error(w, "User already exists with this email", http.StatusConflict)
 			return
 		}
-
+		
+		util.SendError(w, "Internal Server Error", http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
