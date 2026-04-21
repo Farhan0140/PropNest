@@ -6,6 +6,7 @@ const useAdmin = () => {
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
   const [renters, setRenters] = useState([]);
+  const [electricityReadings, setElectricityReadings] = useState([]);
 
   const [refreshUnits, setRefreshUnits] = useState(0);
 
@@ -59,6 +60,21 @@ const useAdmin = () => {
     })();
   }, [authToken]);
   
+  useEffect(() => {
+    (async() => {
+      try {
+
+        const res = await authApiClient.get("/electricity");
+        console.log(res.data);
+        setElectricityReadings(res.data);
+      
+      } catch (error) {
+
+        console.log(error);
+
+      }
+    })();
+  }, [authToken]);
 
   // ________________________ For Property __________________________________ 
 
@@ -332,6 +348,32 @@ const useAdmin = () => {
     }
   }
 
+  const CreateElectricityReading = async(data) => {
+    setIsLoading(true);
+
+    try {
+      const res = await authApiClient.post("/electricity", {
+        unit_id: data.unit_id,
+        year: data.year,
+        month: data.month,
+        reading_value: data.reading_value
+      });
+
+      return {
+        response: res.data,
+        message: "Unit Created Successfully"
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        response: null,
+        message: "Is unit already added this month?"
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return {
     properties,
     CreateProperty,
@@ -353,6 +395,10 @@ const useAdmin = () => {
     UpdateRenter,
     DeleteRenter,
     isLoading,
+
+    electricityReadings,
+    CreateElectricityReading,
+    setElectricityReadings,
 
     isDeleting,
   };

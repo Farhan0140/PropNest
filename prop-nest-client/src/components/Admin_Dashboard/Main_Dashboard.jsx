@@ -24,10 +24,10 @@ const Main_Dashboard = () => {
 
   // TODO in stats fix monthly rent collected, pending rent, total expenses, maintenance requests
   const stats = [
-    { label: 'Total Properties', value: properties.length, icon: Building, color: 'bg-blue-400' },
-    { label: 'Total Units', value: units.length, icon: Home, color: 'bg-green-400' },
-    { label: 'Occupied Units', value: units.filter(u => u.status === 'occupied').length, icon: CheckCircle, color: 'bg-green-400' },
-    { label: 'Available Units', value: units.filter(u => u.status === 'available').length, icon: AlertCircle, color: 'bg-yellow-400' },
+    { label: 'Total Properties', value: properties?.length || 0, icon: Building, color: 'bg-blue-400' },
+    { label: 'Total Units', value: units?.length || 0, icon: Home, color: 'bg-green-400' },
+    { label: 'Occupied Units', value: units?.filter(u => u.status === 'occupied').length || 0, icon: CheckCircle, color: 'bg-green-400' },
+    { label: 'Available Units', value: units?.filter(u => u.status === 'available').length || 0, icon: AlertCircle, color: 'bg-yellow-400' },
     { label: 'Monthly Rent Collected', value: '৳67,890', icon: CreditCard, color: 'bg-green-400' },
     { label: 'Pending Rent', value: '৳12,450', icon: Clock, color: 'bg-orange-400' },
     { label: 'Total Expenses', value: '৳23,100', icon: DollarSign, color: 'bg-red-400' },

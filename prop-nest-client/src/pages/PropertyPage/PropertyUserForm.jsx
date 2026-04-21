@@ -25,7 +25,7 @@ const PropertyUserForm = () => {
 
       if(res.response != null) {
 
-        setProperties((prev) => [...prev, res.response]);
+        setProperties((prev) => [(Array.isArray(prev) ? prev : []), res.response]);
         console.log(res.response);
         setFailedMsg(res.message);
         setTimeout(() => navigate("/property"), 1000);

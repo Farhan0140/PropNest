@@ -41,7 +41,7 @@ const Renter_Dashboard = () => {
   };
 
 
-  const filteredRenters = renters.filter(renter => {
+  const filteredRenters = renters?.filter(renter => {
     const query = searchQuery?.toLowerCase() || "";
     return (
       renter?.full_name?.toLowerCase().includes(query) ||
@@ -105,7 +105,7 @@ const Renter_Dashboard = () => {
           </button>
         </div>
 
-        {filteredRenters.length > 0 ? (
+        {filteredRenters?.length > 0 ? (
           <div className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,0.7)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">

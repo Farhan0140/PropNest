@@ -45,23 +45,23 @@ const Unit_Dashboard = () => {
   };
 
 
-  const filteredUnits = units.filter(unit => {
-    const prop = properties.find(p => p.id === unit?.property_id);
+  const filteredUnits = units?.filter(unit => {
+    const prop = properties?.find(p => p.id === unit?.property_id);
     const query = searchQuery?.toLowerCase() || "";
     return (
       unit?.unit_name?.toLowerCase().includes(query) ||
-      (prop && prop?.house_name.toLowerCase().includes(query)) ||
-      (unit?.renter_name && unit.renter_name?.toLowerCase().includes(query)) ||
-      unit?.status.toLowerCase().includes(query)
+      (prop && prop?.house_name?.toLowerCase().includes(query)) ||
+      (unit?.renter_name && unit?.renter_name?.toLowerCase().includes(query)) ||
+      unit?.status?.toLowerCase().includes(query)
     );
   });
 
   const groupedUnits = useMemo(() => {
     const groups = {};
-    filteredUnits.forEach(unit => {
-      const propId = unit.property_id;
+    filteredUnits?.forEach(unit => {
+      const propId = unit?.property_id;
       if (!groups[propId]) {
-        const prop = properties.find(p => p.id === propId);
+        const prop = properties?.find(p => p.id === propId);
         groups[propId] = { property: prop, units: [] };
       }
       groups[propId].units.push(unit);
@@ -145,7 +145,7 @@ const Unit_Dashboard = () => {
                                 {unit.status}
                               </span>
                             </td>
-                            <td className="py-3 px-4 text-black">{renters.find((renter) => renter.unit_id === unit.id)?.full_name || '-'}</td>
+                            <td className="py-3 px-4 text-black">{renters?.find((renter) => renter.unit_id === unit.id)?.full_name || '-'}</td>
                             <td className="py-3 px-4">
                               <div className="flex items-center space-x-2">
                                 <button

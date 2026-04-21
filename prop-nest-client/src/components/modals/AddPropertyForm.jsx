@@ -43,7 +43,11 @@ const AddPropertyForm = ({ onCloseButtonClick, defaultValues = {}, isEdit = fals
             p.id === defaultValues.id ? res.response : p
           ));
         } else {
-          setProperties((prev) => [...prev, res.response]);
+          // setProperties((prev) => [...prev, res?.response]);
+          setProperties(prev => [
+            ...(Array.isArray(prev) ? prev : []),
+            res.response
+          ]);
         }
 
         console.log(res.response);

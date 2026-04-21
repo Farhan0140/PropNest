@@ -44,10 +44,10 @@ const Property_Dashboard = () => {
     }
   };
 
-  const filteredProperties = properties.filter(prop =>
-    prop.house_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    prop.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    prop.city.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProperties = properties?.filter(prop =>
+    prop?.house_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    prop?.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    prop?.city?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -103,17 +103,17 @@ const Property_Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProperties.length > 0 ? (
+                {filteredProperties?.length > 0 ? (
                   filteredProperties.map((prop) => (
                     <tr key={prop.id} className="border-b border-gray-300 hover:bg-gray-100 transition-colors">
-                      <td className="py-3 px-4 font-medium text-black">{prop.house_name}</td>
-                      <td className="py-3 px-4 text-black">{prop.address}</td>
-                      <td className="py-3 px-4 text-black">{prop.city}</td>
-                      <td className="py-3 px-4 text-black">{prop.number_of_floors}</td>
-                      <td className="py-3 px-4 text-black">{units.filter(u => u?.property_id === prop.id).length}</td>
-                      <td className="py-3 px-4 text-black">{units.filter(u => u?.property_id === prop.id && u.status === 'occupied').length}</td>
-                      <td className="py-3 px-4 text-black">{units.filter(u => u?.property_id === prop.id && u.status === 'available').length}</td>
-                      <td className="py-3 px-4 font-bold text-black">৳{prop.base_rent.toLocaleString()}</td>
+                      <td className="py-3 px-4 font-medium text-black">{prop?.house_name}</td>
+                      <td className="py-3 px-4 text-black">{prop?.address}</td>
+                      <td className="py-3 px-4 text-black">{prop?.city}</td>
+                      <td className="py-3 px-4 text-black">{prop?.number_of_floors}</td>
+                      <td className="py-3 px-4 text-black">{units?.filter(u => u?.property_id === prop?.id).length}</td>
+                      <td className="py-3 px-4 text-black">{units?.filter(u => u?.property_id === prop?.id && u?.status === 'occupied').length}</td>
+                      <td className="py-3 px-4 text-black">{units?.filter(u => u?.property_id === prop?.id && u?.status === 'available').length}</td>
+                      <td className="py-3 px-4 font-bold text-black">৳{prop?.base_rent?.toLocaleString()}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-2">
                           <button

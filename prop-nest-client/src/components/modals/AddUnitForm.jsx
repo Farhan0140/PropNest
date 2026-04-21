@@ -51,7 +51,10 @@ const AddUnitForm = ({ onCloseButtonClick, defaultValues={}, isEdit=false }) => 
             u.id === defaultValues.id ? res.response : u
           ));
         } else {
-          setUnits((prev) => [...prev, res.response]);
+          setUnits((prev) => [
+            ...(Array.isArray(prev) ? prev : []),
+            res.response
+          ]);
         }
 
         console.log(res.response);
@@ -89,7 +92,7 @@ const AddUnitForm = ({ onCloseButtonClick, defaultValues={}, isEdit=false }) => 
             <option value="" disabled className="text-black">
               Select Property
             </option>
-            {properties.map((property) => (
+            {properties?.map((property) => (
               <option key={property.id} value={property.id} className="text-black">
                 {property.house_name}
               </option>

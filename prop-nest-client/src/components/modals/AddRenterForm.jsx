@@ -76,7 +76,7 @@ const AddRenterForm = ({ onCloseButtonClick, defaultValues = {}, isEdit = false 
             r.id === defaultValues.id ? res.response : r
           ));
         } else {
-          setRenters((prev) => [...prev, res.response]);
+          setRenters((prev) => [...(Array.isArray(prev) ? prev : []), res?.response]);
         }
 
         setFailedMsg(res.message || (isEdit ? "Renter updated successfully" : "Renter added successfully"));
