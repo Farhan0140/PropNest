@@ -19,7 +19,8 @@ type Electricity struct {
 
 type ElectricityRepo interface {
 	Create(electricity Electricity) (*Electricity, error)
-	List(unitId int) ([]*Electricity, error)
+	Get(unitId int) ([]*Electricity, error)
+	List() ([]*Electricity, error)
 }
 
 type electricityRepo struct {
@@ -59,7 +60,7 @@ func (r *electricityRepo) Create(electricity Electricity) (*Electricity, error) 
 	return &electricity, nil
 }
 
-func (r *electricityRepo) List(unitId int) ([]*Electricity, error) {
+func (r *electricityRepo) Get(unitId int) ([]*Electricity, error) {
 	var electricityList []*Electricity
 
 	query := `
@@ -83,3 +84,69 @@ func (r *electricityRepo) List(unitId int) ([]*Electricity, error) {
 
 	return electricityList, nil
 }
+
+func (r *electricityRepo) List() ([]*Electricity, error) {
+	var electricityList []*Electricity
+
+	query := `
+		SELECT 
+			id,
+			unit_id,
+			year,
+			month,
+			reading_value
+		FROM electricity_readings
+	`
+
+	err := r.db.Select(&electricityList, query)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("No Previous history Found")
+		}
+		return nil, err
+	}
+
+	return electricityList, nil
+}
+
+// TODO finish this
+// func (r *electricityRepo) Update(unitId int, electricity Electricity) (*Electricity, error) {
+// 	query := `
+// 		SELECT 
+// 			id,
+// 			unit_id,
+// 			year,
+// 			month,
+// 			reading_value
+// 		FROM electricity_readings
+// 		WHERE unit_id = $1
+// 		ORDER BY year DESC, month DESC
+// 		LIMIT 1
+// 	`
+
+// 	var last Electricity
+
+// 	err := r.db.QueryRow(query, unitId).Scan(
+// 		&last.Id,
+// 		&last.UnitId,
+// 		&last.Year,
+// 		&last.Month,
+// 		&last.ReadingValue,
+// 	)
+
+// 	if err != nil {
+// 		if err != sql.ErrNoRows {
+// 			return nil, err
+// 		}
+// 		// no previous record → safe to insert
+// 	}
+
+// 	// 🔥 Compare
+// 	if last.Year == electricity.Year && last.Month == electricity.Month {
+// 		// same month found
+// 		return nil, errors.New("reading for this month already exists")
+// 	}
+
+// 	// otherwise proceed insert/update
+// 	return &electricity, nil
+// }

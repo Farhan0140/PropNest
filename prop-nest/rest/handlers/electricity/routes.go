@@ -16,9 +16,18 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middlewares.Manage
 	)
 
 	mux.Handle(
-		"GET /electricity",
+		"GET /electricity/{id}",
 		manager.With(
 			http.HandlerFunc(h.GetPreviousUnitHistory),
+			h.middlewares.RequireRole("admin"),
+			h.middlewares.AuthenticateJWT,
+		),
+	)
+
+	mux.Handle(
+		"GET /electricity",
+		manager.With(
+			http.HandlerFunc(h.GetAllUnitHistory),
 			h.middlewares.RequireRole("admin"),
 			h.middlewares.AuthenticateJWT,
 		),

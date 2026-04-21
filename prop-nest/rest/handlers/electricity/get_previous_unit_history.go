@@ -1,10 +1,10 @@
 package electricity
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"propnest/util"
+	"strconv"
 )
 
 type UnitID struct {
@@ -12,19 +12,16 @@ type UnitID struct {
 }
 
 func (h *Handler) GetPreviousUnitHistory(w http.ResponseWriter, r *http.Request) {
-	var unitId UnitID
-
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&unitId)
+	var unitId = r.PathValue("id")
+	uId, err := strconv.Atoi(unitId)
 	if err != nil {
-		fmt.Println(err)
 		util.SendError(w, map[string]string{
-			"error": "Invalid Request Data",
+			"error": "Enter Valid Unit Id",
 		}, http.StatusBadRequest)
 		return
 	}
 
-	historyLst, err := h.electricityRepo.List(unitId.UnitId)
+	historyLst, err := h.electricityRepo.Get(uId)
 	if err != nil {
 		fmt.Println(err)
 		util.SendError(w, map[string]string{
