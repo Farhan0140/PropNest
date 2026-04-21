@@ -18,11 +18,12 @@ type DBConfig struct {
 }
 
 type Config struct {
-	Version     string
-	ServiceName string
-	HttpPort    int
-	SecretKey   string
-	DB          *DBConfig
+	Version       string
+	ServiceName   string
+	HttpPort      int
+	SecretKey     string
+	DB            *DBConfig
+	NeonDBconnStr string
 }
 
 var configuration *Config
@@ -112,12 +113,17 @@ func loadConfig() {
 		EnableSSLMode: db_enable_ssl_mode,
 	}
 
+	// Online Neon Database
+	connStr := os.Getenv("CONN_STRING_FOR_DB")
+
 	configuration = &Config{
 		Version:     version,
 		ServiceName: serviceName,
 		HttpPort:    httpPort,
 		SecretKey:   secretKey,
 		DB:          db_config,
+
+		NeonDBconnStr: connStr,
 	}
 }
 

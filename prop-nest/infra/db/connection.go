@@ -24,8 +24,9 @@ func getConnectionString(cnf *config.DBConfig) string {
 	return connStr
 }
 
-func NewConnection(cnf *config.DBConfig) (*sqlx.DB, error) {
-	dbSource := getConnectionString(cnf)
+func NewConnection(connStr string) (*sqlx.DB, error) {
+	// dbSource := getConnectionString(cnf)
+	dbSource := connStr
 
 	dbCon, err := sqlx.Connect("postgres", dbSource)
 	if err != nil {
