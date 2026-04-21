@@ -14,6 +14,7 @@ import (
 	units "propnest/rest/handlers/units"
 	"propnest/rest/handlers/user"
 	"propnest/rest/middlewares"
+	"time"
 )
 
 func Serve() {
@@ -23,6 +24,9 @@ func Serve() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	dbCon.SetMaxOpenConns(10)
+	dbCon.SetMaxIdleConns(5)
+	dbCon.SetConnMaxLifetime(time.Minute * 5)
 
 	err = db.MigrateDB(dbCon, "./migrations")
 	if err != nil {

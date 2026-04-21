@@ -15,18 +15,11 @@ type Unit struct {
 	Status     string  `json:"status" db:"status"`
 }
 
-type UnitWithRenter struct {
-	PropertyId int     `json:"property_id" db:"property_id"`
-	Id         int     `json:"id" db:"id"`
-	UnitName   string  `json:"unit_name" db:"unit_name"`
-	RentAmount float64 `json:"rent_amount" db:"rent_amount"`
-	Status     string  `json:"status" db:"status"`
-	RenterName string  `json:"full_name" db:"full_name"`
-}
+
 
 type UnitRepo interface {
 	Create(unit Unit) (*Unit, error)
-	List(ownerId int) ([]*UnitWithRenter, error)
+	List(ownerId int) ([]*Unit, error)
 	Update(unit Unit, ownerID int) (*Unit, error)
 	Delete(unit_id int, ownerID int) error
 }
@@ -66,8 +59,8 @@ func (r *unitRepo) Create(unit Unit) (*Unit, error) {
 	return &unit, nil
 }
 
-func (r *unitRepo) List(ownerId int) ([]*UnitWithRenter, error) {
-	var unitList []*UnitWithRenter
+func (r *unitRepo) List(ownerId int) ([]*Unit, error) {
+	var unitList []*Unit
 
 	query := `
 		SELECT 
