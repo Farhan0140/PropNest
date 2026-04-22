@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router";
+import { Route, Routes } from "react-router-dom";
 import UserLogin from "../pages/Auth/UserLogin";
 import UserSignUp from "../pages/Auth/UserSignUp";
 import PropertyFormLayout from "../pages/Layouts/PropertyFormLayout";

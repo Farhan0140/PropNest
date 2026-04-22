@@ -1,6 +1,6 @@
 import { Plus, Hotel, Info, X, MapPin, Home, DollarSign, Building, Mail, Hash, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import useAdminContext from '../../hooks/Admin/useAdminContext';
 
 const PropertyListing = () => {

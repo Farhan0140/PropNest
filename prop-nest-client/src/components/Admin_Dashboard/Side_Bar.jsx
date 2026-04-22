@@ -11,7 +11,7 @@ import {
   Bell,
   Receipt,
 } from 'lucide-react';
-import { Link, Outlet, useNavigate } from 'react-router';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import useAuthContext from '../../hooks/Auth/useAuthContext';
 
 const Side_Bar = () => {

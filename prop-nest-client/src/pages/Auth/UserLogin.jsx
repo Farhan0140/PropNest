@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import useAuthContext from '../../hooks/Auth/useAuthContext';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 const UserLogin = () => {
   const [showPassword, setShowPassword] = useState(true);
