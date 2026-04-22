@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router";
 import UserLogin from "../pages/Auth/UserLogin";
 import UserSignUp from "../pages/Auth/UserSignUp";
-import PropertyFormLayout from "../pages/Layouts/propertyFormLayout";
+import PropertyFormLayout from "../pages/Layouts/PropertyFormLayout";
 import PropertyUserForm from "../pages/PropertyPage/PropertyUserForm.jsx";
 import PropertyListing from "../pages/PropertyPage/PropertyListing.jsx";
 import Side_Bar from "../components/Admin_Dashboard/Side_Bar.jsx";
@@ -13,7 +13,7 @@ import Renter_Dashboard from "../components/Admin_Dashboard/Renter_Dashboard.jsx
 import Current_Renter_Dashboard from "../components/Admin_Dashboard/Current_Renter_Dashboard.jsx";
 import Previous_Renter_Dashboard from "../components/Admin_Dashboard/Previous_Renter_Dashboard.jsx";
 import Rent_Management_Dashboard from "../components/Admin_Dashboard/Rent_Management_Dashboard.jsx";
-import Electricity_Bill_Dashboard from "../components/Bills_Dashboard/electricity_bill_dashboard.jsx";
+import Electricity_Bill_Dashboard from "../components/Bills_Dashboard/Electricity_Bill_Dashboard.jsx";
 
 const AppRoutes = () => {
   return (

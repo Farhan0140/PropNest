@@ -63,8 +63,16 @@ func (server *Server) Start() {
 	server.billsHandler.RegisterRoutes(mux, manager)
 	server.electricityHandler.RegisterRoutes(mux, manager)
 
-	addr := ":" + strconv.Itoa(server.cnf.HttpPort)
-	fmt.Println("Server is Running on port ", addr)
+	// addr := ":" + strconv.Itoa(server.cnf.HttpPort)
+	// fmt.Println("Server is Running on port ", addr)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = strconv.Itoa(server.cnf.HttpPort) // fallback for local dev
+	}
+
+	addr := ":" + port
+
+	fmt.Println("Server is Running on port", addr)
 	err := http.ListenAndServe(addr, wrappedMux)
 	if err != nil {
 		fmt.Println("Error Occurred while starting the server: ", err)

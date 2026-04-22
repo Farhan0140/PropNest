@@ -29,10 +29,11 @@ type Config struct {
 var configuration *Config
 
 func loadConfig() {
-	err := godotenv.Load() // The Load() function automatically loads the .env file from the root folder
-	if err != nil {        // If the Load() function cannot find the .env file, it returns an error
-		fmt.Println("Failed to load .env file", err)
-		os.Exit(1)
+	if os.Getenv("ENV") != "production" {
+		err := godotenv.Load()
+		if err != nil {
+			fmt.Println("No .env file found, using system environment variables")
+		}
 	}
 
 	// Loads all .env variables one by one
