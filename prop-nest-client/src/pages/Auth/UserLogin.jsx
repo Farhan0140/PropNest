@@ -25,7 +25,7 @@ const UserLogin = () => {
       setLoginErr(false);
       setLoginSuccess(res.success);
       // TODO add dashboard route to redirect user role based
-      setTimeout(() => navigate("/property"), 2000)
+      setTimeout(() => navigate("/admin-dashboard"), 2000)
     } else {
       setLoginErr(true);
     }
@@ -154,7 +154,11 @@ const UserLogin = () => {
               loginLoading? <span className="loading loading-dots loading-lg"></span> : "Log in →"
             }
           </button>
+          <div className='text-black'>Don't Have an account <span> </span>
+            <button type='button' onClick={() => navigate('/sign-up')} href="#" className='text-blue-500 font-semibold'>Sign-up</button>
+          </div>
         </form>
+
       </div>
     </div>
   );

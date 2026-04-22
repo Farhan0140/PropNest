@@ -192,6 +192,10 @@ const UserSignUp = () => {
               regLoading ? <span className="loading loading-dots loading-xl text-natural"></span> : "Let`s go →"
             }
           </button>
+
+          <div className='text-black'>Already Have an account <span> </span>
+            <button type='button' onClick={() => navigate('/login')} href="#" className='text-blue-500 font-semibold'>Sign-in</button>
+          </div>
         </form>
       </div>
     </div>

@@ -3,6 +3,8 @@ import apiClient from "../../services/api-client";
 
 const useAuth = () => {
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const [user, setUser] = useState(null);
   const getToken = () => {
     const token = localStorage.getItem("authTokens");
@@ -11,23 +13,47 @@ const useAuth = () => {
 
   const [authToken, setAuthToken] = useState(getToken());
 
-  useEffect(() => {
-    if (authToken) {
-      fetchUserProfile();
-    }
-  }, [authToken]);
+  // useEffect(() => {
+  //   if (authToken) {
+  //     fetchUserProfile();
+  //   }
+  // }, [authToken]);
 
-  // Fetch User
-  const fetchUserProfile = async () => {
-    try {
-      const response = await apiClient.get("/users/me", {
-        headers: { Authorization: `JWT ${authToken}` },
-      });
-      setUser(response.data);
-    } catch ( error ) {
-      console.log("Fetching User Error", error);
-    }
-  }
+  // // Fetch User
+  // const fetchUserProfile = async () => {
+  //   try {
+  //     const response = await apiClient.get("/users/me", {
+  //       headers: { Authorization: `JWT ${authToken}` },
+  //     });
+  //     setUser(response.data);
+  //     console.log("User ", user);
+  //   } catch ( error ) {
+  //     console.log("Fetching User Error", error);
+  //   }
+  // }
+  useEffect(() => {
+    const initAuth = async () => {
+      if (!authToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await apiClient.get("/users/me", {
+          headers: { Authorization: `JWT ${authToken}` },
+        });
+
+        setUser(response.data);
+      } catch (error) {
+        console.log("Fetching User Error", error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+  }, [authToken]);
 
   // For Register User 
   const [regLoading, setRegLoading] = useState(false);
@@ -96,7 +122,9 @@ const useAuth = () => {
       registerUser,
       regLoading,
       loginUser,
-      loginLoading
+      loginLoading,
+
+      isLoading
   };
 };
 
