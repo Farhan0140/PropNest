@@ -14,6 +14,7 @@ import Electricity_Bill_Dashboard from "../components/Bills_Dashboard/Electricit
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import NotFoundOrError from "../components/Message/NotFoundOrError.jsx";
 import LoadingAnimation from "../components/Message/LoadingAnimation.jsx";
+import Bills_Dashboard from "../components/Admin_Dashboard/Bills_Dashboard.jsx";
 
 const AppRoutes = () => {
   return (
@@ -35,6 +36,7 @@ const AppRoutes = () => {
           <Route path="previous-renter-dashboard" element={<Previous_Renter_Dashboard />} />
           <Route path="rent-management-dashboard" element={<Rent_Management_Dashboard />} />
           <Route path="electricity-dashboard" element={<Electricity_Bill_Dashboard />} />
+          <Route path="bills-dashboard" element={<Bills_Dashboard />} />
         </Route>
       </Route>
 

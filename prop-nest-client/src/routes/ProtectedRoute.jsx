@@ -4,8 +4,7 @@ import LoadingAnimation from "../components/Message/LoadingAnimation";
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const {user, isLoading} = useAuthContext();
-
-  console.log("B for Login after Logon", user);
+  
   if(isLoading) {
     return <LoadingAnimation />
   }
