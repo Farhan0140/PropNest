@@ -1,4 +1,4 @@
-package bills
+package rentinvoice
 
 import (
 	"propnest/repo"
@@ -6,16 +6,16 @@ import (
 )
 
 type Handler struct {
-	middlewares *middlewares.Middleware
-	billsRepo repo.BillsRepo
+	middlewares     *middlewares.Middleware
+	rentInvoiceRepo repo.RentInvoiceRepo
 }
 
 func NewHandler(
 	middlewares *middlewares.Middleware,
-	billsRepo repo.BillsRepo,
+	rentInvoiceRepo repo.RentInvoiceRepo,
 ) *Handler {
 	return &Handler{
 		middlewares: middlewares,
-		billsRepo: billsRepo,
+		rentInvoiceRepo:   rentInvoiceRepo,
 	}
 }

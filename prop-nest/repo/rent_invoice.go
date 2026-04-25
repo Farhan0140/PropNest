@@ -1,0 +1,314 @@
+package repo
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/jmoiron/sqlx"
+)
+
+type InvoiceItem struct {
+	Type        string   `json:"type"`
+	Note        *string  `json:"note"`
+	TotalAmount *float64 `json:"total_amount"`
+}
+
+type CreateInvoiceRequest struct {
+	Scope            string        `json:"scope"` // property | all | unit
+	TargetUnitID     *int          `json:"target_unit_id"`
+	TargetPropertyID *int          `json:"target_property_id"`
+	Items            []InvoiceItem `json:"items"`
+}
+
+type RentInvoiceRepo interface {
+	Create(req CreateInvoiceRequest) error
+}
+
+type rentInvoiceRepo struct {
+	db *sqlx.DB
+}
+
+func NewBillsRepo(db *sqlx.DB) RentInvoiceRepo {
+	return &rentInvoiceRepo{
+		db: db,
+	}
+}
+
+func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	now := time.Now()
+	year := now.Year()
+	month := int(now.Month())
+
+	// =========================
+	// 🔹 Step 1: Get Units
+	// =========================
+	var unitIDs []int
+
+	switch req.Scope {
+
+	case "property":
+		if req.TargetPropertyID == nil {
+			return fmt.Errorf("property_id required")
+		}
+
+		err = tx.Select(&unitIDs, `
+			SELECT u.id
+			FROM units u
+			JOIN renters r ON r.unit_id = u.id AND r.status = 'active'
+			WHERE u.property_id = $1 AND u.status = 'occupied'
+		`, *req.TargetPropertyID)
+
+	case "all":
+		err = tx.Select(&unitIDs, `
+			SELECT u.id
+			FROM units u
+			JOIN renters r ON r.unit_id = u.id AND r.status = 'active'
+			WHERE u.status = 'occupied'
+		`)
+
+	case "unit":
+		if req.TargetUnitID == nil {
+			return fmt.Errorf("unit_id required")
+		}
+
+		err = tx.Select(&unitIDs, `
+			SELECT u.id
+			FROM units u
+			JOIN renters r ON r.unit_id = u.id AND r.status = 'active'
+			WHERE u.id = $1 AND u.status = 'occupied'
+		`, *req.TargetUnitID)
+
+	default:
+		return fmt.Errorf("invalid scope")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if len(unitIDs) == 0 {
+		return fmt.Errorf("no valid units found")
+	}
+
+	// =========================
+	// 🔹 Step 2: Loop Units
+	// =========================
+	for _, unitID := range unitIDs {
+
+		// 🔸 Prevent duplicate invoice
+		var exists int
+		err = tx.Get(&exists, `
+			SELECT COUNT(1)
+			FROM rent_invoices
+			WHERE unit_id=$1 AND month=$2 AND year=$3
+		`, unitID, month, year)
+
+		if err != nil {
+			return err
+		}
+		if exists > 0 {
+			continue
+		}
+
+		// 🔸 Get rent amount
+		var rentAmount float64
+		err = tx.Get(&rentAmount, `
+			SELECT rent_amount FROM units WHERE id=$1
+		`, unitID)
+		if err != nil {
+			return err
+		}
+
+		// 🔸 Get renter_id
+		var renterID int
+		err = tx.Get(&renterID, `
+			SELECT id FROM renters
+			WHERE unit_id=$1 AND status='active'
+			LIMIT 1
+		`, unitID)
+
+		if err != nil {
+			continue
+		}
+
+		// =========================
+		// 🔹 Create Invoice FIRST
+		// =========================
+		var invoiceID int64
+		var totalAmount float64 = 0
+
+		err = tx.QueryRow(`
+			INSERT INTO rent_invoices (renter_id, unit_id, month, year, status, total_amount)
+			VALUES ($1,$2,$3,$4,'unpaid',0)
+			RETURNING id
+		`,
+			renterID,
+			unitID,
+			month,
+			year,
+		).Scan(&invoiceID)
+
+		if err != nil {
+			return err
+		}
+
+		// =========================
+		// 🔹 Add Rent
+		// =========================
+		totalAmount += rentAmount
+
+		_, err = tx.Exec(`
+			INSERT INTO invoice_items
+			(invoice_id, item_type, amount, description)
+			VALUES ($1,'rent',$2,'Monthly Rent')
+		`, invoiceID, rentAmount)
+
+		if err != nil {
+			return err
+		}
+
+		// =========================
+		// 🔹 Add Electricity (optional)
+		// =========================
+		var elecAmount float64
+
+		err = tx.Get(&elecAmount, `
+			SELECT total_amount
+			FROM electricity_bills
+			WHERE unit_id=$1 AND year=$2 AND month=$3
+		`, unitID, year, month)
+
+		if err == nil {
+			totalAmount += elecAmount
+
+			_, err = tx.Exec(`
+				INSERT INTO invoice_items
+				(invoice_id, item_type, amount, description)
+				VALUES ($1,'electricity',$2,'Electricity Bill')
+			`, invoiceID, elecAmount)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		// =========================
+		// 🔹 Add Other Items
+		// =========================
+		for _, item := range req.Items {
+
+			if item.TotalAmount == nil {
+				continue
+			}
+
+			amount := *item.TotalAmount
+			totalAmount += amount
+
+			_, err = tx.Exec(`
+				INSERT INTO invoice_items
+				(invoice_id, item_type, amount, description)
+				VALUES ($1,$2,$3,$4)
+			`,
+				invoiceID,
+				item.Type,
+				amount,
+				item.Note,
+			)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		// =========================
+		// 🔹 Update Total
+		// =========================
+		_, err = tx.Exec(`
+			UPDATE rent_invoices
+			SET total_amount = $1
+			WHERE id = $2
+		`, totalAmount, invoiceID)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+/*
+
+{
+  "scope": "all",
+  "items": [
+    {
+      "type": "others",
+      "note": "Cleaning charge",
+      "total_amount": 500
+    },
+    {
+      "type": "others",
+      "note": "Maintenance",
+      "total_amount": 1200
+    }
+  ]
+}
+
+
+
+
+{
+  "scope": "property",
+  "target_property_id": 2,
+  "items": [
+    {
+      "type": "others",
+      "note": "Cleaning",
+      "total_amount": 500
+    },
+    {
+      "type": "others",
+      "note": "Maintenance",
+      "total_amount": 1200
+    },
+    {
+      "type": "others",
+      "note": "Security",
+      "total_amount": 200
+    }
+  ]
+}
+
+
+
+
+{
+  "scope": "unit",
+  "target_unit_id": 32,
+  "items": [
+    {
+      "type": "others",
+      "note": "Cleaning charge",
+      "total_amount": 500
+    },
+    {
+      "type": "others",
+      "note": "Maintenance fee",
+      "total_amount": 1200
+    },
+    {
+      "type": "others",
+      "note": "Security",
+      "total_amount": 500
+    }
+  ]
+}
+
+*/

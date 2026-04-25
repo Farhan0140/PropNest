@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 	"propnest/config"
-	"propnest/rest/handlers/bills"
 	"propnest/rest/handlers/electricity"
 	property "propnest/rest/handlers/property"
+	rentinvoice "propnest/rest/handlers/rent_invoice"
 	"propnest/rest/handlers/renter"
 	units "propnest/rest/handlers/units"
 	"propnest/rest/handlers/user"
@@ -21,7 +21,7 @@ type Server struct {
 	propertyHandler    *property.Handler
 	unitHandler        *units.Handler
 	renterHandler      *renter.Handler
-	billsHandler       *bills.Handler
+	rentInvoiceHandler       *rentinvoice.Handler
 	electricityHandler *electricity.Handler
 }
 
@@ -31,7 +31,7 @@ func NewServer(
 	propertyHandler *property.Handler,
 	unitHandler *units.Handler,
 	renterHandler *renter.Handler,
-	billsHandler *bills.Handler,
+	rentInvoiceHandler *rentinvoice.Handler,
 	electricityHandler *electricity.Handler,
 ) *Server {
 	return &Server{
@@ -40,7 +40,7 @@ func NewServer(
 		propertyHandler: propertyHandler,
 		unitHandler:     unitHandler,
 		renterHandler:   renterHandler,
-		billsHandler:    billsHandler,
+		rentInvoiceHandler:    rentInvoiceHandler,
 		electricityHandler: electricityHandler,
 	}
 }
@@ -60,7 +60,7 @@ func (server *Server) Start() {
 	server.propertyHandler.RegisterRoutes(mux, manager)
 	server.unitHandler.RegisterRoutes(mux, manager)
 	server.renterHandler.RegisterRoutes(mux, manager)
-	server.billsHandler.RegisterRoutes(mux, manager)
+	server.rentInvoiceHandler.RegisterRoutes(mux, manager)
 	server.electricityHandler.RegisterRoutes(mux, manager)
 
 	// addr := ":" + strconv.Itoa(server.cnf.HttpPort)

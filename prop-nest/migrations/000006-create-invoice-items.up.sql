@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     invoice_id BIGINT NOT NULL,
     item_type VARCHAR(50) NOT NULL, -- rent, electricity, gas, water, etc.
 
-    quantity NUMERIC(10,2) CHECK (amount >= 0),         -- e.g. units (for electricity)
-    unit_price NUMERIC(10,2) CHECK (amount >= 0),       -- price per unit
+    quantity NUMERIC(10,2) CHECK (quantity >= 0),         -- e.g. units (for electricity)
+    unit_price NUMERIC(10,2) CHECK (unit_price >= 0),       -- price per unit
 
     amount NUMERIC(10,2) NOT NULL CHECK (amount >= 0),  -- final calculated amount
 

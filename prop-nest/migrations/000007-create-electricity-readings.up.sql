@@ -17,3 +17,4 @@ CREATE TABLE IF NOT EXISTS electricity_readings (
 
     CONSTRAINT unique_unit_date UNIQUE (unit_id, year, month)
 );
+

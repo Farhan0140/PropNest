@@ -5,16 +5,17 @@ CREATE TABLE IF NOT EXISTS rent_invoices (
     renter_id INTEGER NOT NULL,
     unit_id INTEGER,
 
-    month INTEGER NOT NULL,
-    year INTEGER NOT NULL,
+    month INTEGER NOT NULL CHECK (month BETWEEN 1 AND 12),
+    year INTEGER NOT NULL CHECK (year >= 2000),
 
     rent_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
     late_fee NUMERIC(10,2) DEFAULT 0,
     total_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
 
-    status VARCHAR(20) CHECK (status IN ('paid', 'unpaid', 'partial')),
+    status VARCHAR(20) DEFAULT 'unpaid'
+    CHECK (status IN ('paid', 'unpaid', 'partial')),
 
-    due_date DATE NOT NULL,
+    due_date DATE DEFAULT (CURRENT_DATE + INTERVAL '7 days'),
     paid_date DATE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -27,5 +28,13 @@ CREATE TABLE IF NOT EXISTS rent_invoices (
     CONSTRAINT fk_rent_invoice_unit
         FOREIGN KEY (unit_id)
         REFERENCES units(id)
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+
+    CONSTRAINT unique_unit_month_year UNIQUE (unit_id, month, year),
+
+    CONSTRAINT valid_paid_date CHECK (
+        (status = 'paid' AND paid_date IS NOT NULL) OR
+        (status = 'partial' AND paid_date IS NOT NULL) OR
+        (status = 'unpaid' AND paid_date IS NULL)
+    )
 );
