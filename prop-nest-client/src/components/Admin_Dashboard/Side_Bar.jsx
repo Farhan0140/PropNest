@@ -68,9 +68,8 @@ const Side_Bar = () => {
       label: 'Bills',
       icon: Receipt,
       submenus: {
-        createBills: { label: 'Generate Bills', path: 'bills-dashboard'},
         electricity: { label: 'Electricity', path: 'electricity-dashboard' },
-        others: { label: 'Others', path: '/payments/settings' }
+        createBills: { label: 'Generate Bills', path: 'bills-dashboard'},
       }
     },
     {

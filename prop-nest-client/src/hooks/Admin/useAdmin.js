@@ -7,6 +7,7 @@ const useAdmin = () => {
   const [units, setUnits] = useState([]);
   const [renters, setRenters] = useState([]);
   const [electricityReadings, setElectricityReadings] = useState([]);
+  const [rentInvoice, setRentInvoice] = useState([]);
 
   const [refreshUnits, setRefreshUnits] = useState(0);
 
@@ -17,7 +18,7 @@ const useAdmin = () => {
       try {
 
         const res = await authApiClient.get("/properties");
-        console.log(res.data);
+        // console.log(res.data);
         setProperties(res.data);
 
       } catch (error) {
@@ -33,7 +34,7 @@ const useAdmin = () => {
       try {
 
         const res = await authApiClient.get("/units");
-        console.log(res.data);
+        // console.log(res.data);
         setUnits(res.data);
       
       } catch (error) {
@@ -49,7 +50,7 @@ const useAdmin = () => {
       try {
 
         const res = await authApiClient.get("/renter");
-        console.log(res.data);
+        // console.log(res.data);
         setRenters(res.data);
       
       } catch (error) {
@@ -65,7 +66,7 @@ const useAdmin = () => {
       try {
 
         const res = await authApiClient.get("/electricity");
-        console.log(res.data);
+        // console.log(res.data);
         setElectricityReadings(res.data);
       
       } catch (error) {
@@ -75,6 +76,24 @@ const useAdmin = () => {
       }
     })();
   }, [authToken]);
+  
+  useEffect(() => {
+    (async() => {
+      try {
+
+        const res = await authApiClient.get("/rent-invoices");
+        console.log(res.data);
+        setRentInvoice(res.data);
+      
+      } catch (error) {
+
+        console.log(error);
+
+      }
+    })();
+  }, [authToken]);
+
+  
 
   // ________________________ For Property __________________________________ 
 
@@ -348,6 +367,9 @@ const useAdmin = () => {
     }
   }
 
+
+  //______________________ For Electricity _________________
+
   const CreateElectricityReading = async(data) => {
     setIsLoading(true);
 
@@ -369,6 +391,40 @@ const useAdmin = () => {
         response: null,
         message: "Is unit already added this month?"
       }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+
+  // _____________________ For Rent Invoices ___________________
+
+  const CreateRentInvoicesForALlUnits = async() => {
+    setIsLoading(true);
+
+    try {
+      const res = await authApiClient.post("/rent-invoices", {
+        scope: "all",
+        items: []
+      });
+      
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const CreateRentInvoice = async(payload) => {
+    setIsLoading(true);
+
+    try {
+      const res = await authApiClient.post("/rent-invoices", payload);
+      
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -399,6 +455,11 @@ const useAdmin = () => {
     electricityReadings,
     CreateElectricityReading,
     setElectricityReadings,
+
+    CreateRentInvoicesForALlUnits,
+    CreateRentInvoice,
+    rentInvoice,
+    setRentInvoice,
 
     isDeleting,
   };
