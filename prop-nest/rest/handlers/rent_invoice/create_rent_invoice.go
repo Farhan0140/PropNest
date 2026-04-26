@@ -48,11 +48,11 @@ func (h *Handler) CreateRentInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.rentInvoiceRepo.Create(req)
+	res, err := h.rentInvoiceRepo.Create(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	util.SendData(w, "Invoice created successfully", http.StatusCreated)
+	util.SendData(w, res, http.StatusCreated)
 }

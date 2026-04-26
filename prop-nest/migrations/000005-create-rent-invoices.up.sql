@@ -30,11 +30,5 @@ CREATE TABLE IF NOT EXISTS rent_invoices (
         REFERENCES units(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT unique_unit_month_year UNIQUE (unit_id, month, year),
-
-    CONSTRAINT valid_paid_date CHECK (
-        (status = 'paid' AND paid_date IS NOT NULL) OR
-        (status = 'partial' AND paid_date IS NOT NULL) OR
-        (status = 'unpaid' AND paid_date IS NULL)
-    )
+    CONSTRAINT unique_unit_month_year UNIQUE (unit_id, month, year)
 );

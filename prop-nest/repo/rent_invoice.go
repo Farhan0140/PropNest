@@ -20,8 +20,28 @@ type CreateInvoiceRequest struct {
 	Items            []InvoiceItem `json:"items"`
 }
 
+type InvoiceItemResponse struct {
+	ID          int     `json:"id" db:"id"`
+	ItemType    string  `json:"item_type" db:"item_type"`
+	Amount      float64 `json:"amount" db:"amount"`
+	Description *string `json:"description" db:"description"`
+}
+
+type RentInvoiceResponse struct {
+	ID          int64                 `json:"id" db:"id"`
+	RenterID    int                   `json:"renter_id" db:"renter_id"`
+	UnitID      int                   `json:"unit_id" db:"unit_id"`
+	Month       int                   `json:"month" db:"month"`
+	Year        int                   `json:"year" db:"year"`
+	Status      string                `json:"status" db:"status"`
+	TotalAmount float64               `json:"total_amount" db:"total_amount"`
+	Items       []InvoiceItemResponse `json:"items"`
+}
+
+
 type RentInvoiceRepo interface {
-	Create(req CreateInvoiceRequest) error
+	Create(req CreateInvoiceRequest) ([]RentInvoiceResponse, error)
+	List() ([]RentInvoiceResponse, error)
 }
 
 type rentInvoiceRepo struct {
@@ -34,10 +54,10 @@ func NewBillsRepo(db *sqlx.DB) RentInvoiceRepo {
 	}
 }
 
-func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
+func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) ([]RentInvoiceResponse, error) {
 	tx, err := r.db.Beginx()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer tx.Rollback()
 
@@ -54,7 +74,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 
 	case "property":
 		if req.TargetPropertyID == nil {
-			return fmt.Errorf("property_id required")
+			return nil, fmt.Errorf("property_id required")
 		}
 
 		err = tx.Select(&unitIDs, `
@@ -74,7 +94,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 
 	case "unit":
 		if req.TargetUnitID == nil {
-			return fmt.Errorf("unit_id required")
+			return nil, fmt.Errorf("unit_id required")
 		}
 
 		err = tx.Select(&unitIDs, `
@@ -85,15 +105,15 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 		`, *req.TargetUnitID)
 
 	default:
-		return fmt.Errorf("invalid scope")
+		return nil, fmt.Errorf("invalid scope")
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(unitIDs) == 0 {
-		return fmt.Errorf("no valid units found")
+		return nil, fmt.Errorf("no valid units found")
 	}
 
 	// =========================
@@ -110,7 +130,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 		`, unitID, month, year)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if exists > 0 {
 			continue
@@ -122,7 +142,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 			SELECT rent_amount FROM units WHERE id=$1
 		`, unitID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// 🔸 Get renter_id
@@ -155,7 +175,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 		).Scan(&invoiceID)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// =========================
@@ -170,7 +190,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 		`, invoiceID, rentAmount)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// =========================
@@ -194,7 +214,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 			`, invoiceID, elecAmount)
 
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 
@@ -222,7 +242,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 			)
 
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 
@@ -236,15 +256,47 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 		`, totalAmount, invoiceID)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return tx.Commit()
+	var responses []RentInvoiceResponse
+	for _, unitID := range unitIDs {
+
+		var invoice RentInvoiceResponse
+
+		err = tx.Get(&invoice, `
+			SELECT id, renter_id, unit_id, month, year, status, total_amount
+			FROM rent_invoices
+			WHERE unit_id=$1 AND month=$2 AND year=$3
+		`, unitID, month, year)
+
+		if err != nil {
+			continue
+		}
+
+		var items []InvoiceItemResponse
+
+		err = tx.Select(&items, `
+			SELECT id, item_type, amount, description
+			FROM invoice_items
+			WHERE invoice_id=$1
+		`, invoice.ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		invoice.Items = items
+		responses = append(responses, invoice)
+	}
+
+	return responses, tx.Commit()
 }
 
 /*
 
+Creating for all units for every property
 {
   "scope": "all",
   "items": [
@@ -263,7 +315,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 
 
 
-
+Creating for all units for specific property
 {
   "scope": "property",
   "target_property_id": 2,
@@ -288,7 +340,7 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 
 
 
-
+Creating for single unit
 {
   "scope": "unit",
   "target_unit_id": 32,
@@ -312,3 +364,60 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) error {
 }
 
 */
+
+func (r *rentInvoiceRepo) List() ([]RentInvoiceResponse, error) {
+
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	var invoices []RentInvoiceResponse
+
+	// 🔹 Step 1: Get all invoices
+	err = tx.Select(&invoices, `
+		SELECT 
+			id,
+			renter_id,
+			unit_id,
+			month,
+			year,
+			status,
+			total_amount
+		FROM rent_invoices
+		ORDER BY year DESC, month DESC, id DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+
+	// 🔹 Step 2: Attach items
+	for i := range invoices {
+
+		var items []InvoiceItemResponse
+
+		err = tx.Select(&items, `
+			SELECT 
+				id,
+				item_type,
+				amount,
+				description
+			FROM invoice_items
+			WHERE invoice_id = $1
+		`, invoices[i].ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		invoices[i].Items = items
+	}
+
+	// 🔹 Commit (important even for read tx)
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return invoices, nil
+}
