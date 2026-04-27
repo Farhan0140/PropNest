@@ -1,10 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useForm, useFieldArray } from "react-hook-form";
-import { Plus, X, Search, Building2, FileText, Calendar, ArrowRight, Pencil, DollarSign, Receipt, AlertTriangle, Coins } from 'lucide-react';
+import { Plus, X, Search, Building2, FileText, Calendar, ArrowRight, Pencil, DollarSign, Receipt, AlertTriangle, Coins, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import useAdminContext from '../../hooks/Admin/useAdminContext';
 
 const Bills_Dashboard = () => {
-  const { properties, units, rentInvoice, setRentInvoice, CreateRentInvoice } = useAdminContext();
+  const { 
+    properties, 
+    units, 
+    rentInvoice, 
+    setRentInvoice, 
+    CreateRentInvoice, 
+    CreateRentInvoicesForALlUnits, 
+    isLoading, 
+  } = useAdminContext();
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -23,7 +31,6 @@ const Bills_Dashboard = () => {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [historyData, setHistoryData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const [updateForm, setUpdateForm] = useState({ rent: '', electricity: '', water: '', others: '' });
 
@@ -74,7 +81,7 @@ const Bills_Dashboard = () => {
   }, [isAddModalOpen, selectedBill, resetForm]);
 
   const getItemAmount = (itemsList, type) => {
-    const item = itemsList.find(i => i.item_type === type);
+    const item = itemsList?.find(i => i.item_type === type);
     return item ? item.amount : 0;
   };
 
@@ -83,8 +90,8 @@ const Bills_Dashboard = () => {
   };
 
   const filteredUnits = useMemo(() => {
-    return units.filter(unit => {
-      const prop = properties.find(p => p.id === unit.property_id);
+    return units?.filter(unit => {
+      const prop = properties?.find(p => p.id === unit.property_id);
       const query = searchQuery.toLowerCase();
       return (
         unit.unit_name.toLowerCase().includes(query) ||
@@ -95,7 +102,7 @@ const Bills_Dashboard = () => {
 
   const groupedBills = useMemo(() => {
     const groups = {};
-    filteredUnits.forEach(unit => {
+    filteredUnits?.forEach(unit => {
       const prop = properties.find(p => p.id === unit.property_id);
       const propId = prop?.id || 'unknown';
 
@@ -142,11 +149,29 @@ const Bills_Dashboard = () => {
     return Object.values(groups);
   }, [filteredUnits, properties, bills, currentYear, currentMonth]);
 
-  const handleGenerateAllRents = () => {
-    setIsLoading(true);
+  // Summary statistics
+  const { totalCollected, totalDue, thisMonthIncome, overdueCount } = useMemo(() => {
+    const allBills = bills || [];
+    const collected = allBills.filter(b => b.status === 'paid').reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const due = allBills.filter(b => b.status === 'unpaid').reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const thisMonth = allBills
+      .filter(b => b.status === 'paid' && b.year === currentYear && b.month === currentMonth)
+      .reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const overdue = allBills.filter(b => {
+      if (b.status !== 'unpaid') return false;
+      // Overdue if before current month/year
+      return b.year < currentYear || (b.year === currentYear && b.month < currentMonth);
+    }).length;
+
+    return { totalCollected: collected, totalDue: due, thisMonthIncome: thisMonth, overdueCount: overdue };
+  }, [bills, currentYear, currentMonth]);
+
+  const handleGenerateAllRents = async() => {
+    await CreateRentInvoicesForALlUnits();
+
     setTimeout(() => {
       const existingBillUnitIds = new Set(
-        bills.filter(b => b.year === currentYear && b.month === currentMonth).map(b => b.unit_id)
+        (bills || []).filter(b => b.year === currentYear && b.month === currentMonth).map(b => b.unit_id)
       );
 
       const newBills = units.filter(u => !existingBillUnitIds.has(u.id)).map(u => ({
@@ -160,8 +185,7 @@ const Bills_Dashboard = () => {
         items: []
       }));
 
-      setBills(prev => [...prev, ...newBills]);
-      setIsLoading(false);
+      setBills(prev => [...(prev || []), ...(newBills || [])]);
       setIsGenerateConfirmOpen(false);
     }, 800);
   };
@@ -176,7 +200,7 @@ const Bills_Dashboard = () => {
     setIsAddModalOpen(true);
   };
 
-  const openUpdateModal = (billItem) => {   // TODO fuck this function
+  const openUpdateModal = (billItem) => {
     if (!billItem.hasBill) {
       alert("No existing bill to update. Please add a bill first.");
       return;
@@ -193,7 +217,7 @@ const Bills_Dashboard = () => {
 
   const openHistoryModal = (billItem) => {
     setSelectedBill(billItem);
-    const unitHistory = bills
+    const unitHistory = (bills || [])
       .filter(b => b.unit_id === billItem.unit_id)
       .sort((a, b) => {
         if (a.year !== b.year) return b.year - a.year;
@@ -222,24 +246,20 @@ const Bills_Dashboard = () => {
   };
 
   const onAddBillSubmit = async (data) => {
-    if (!data.items || data.items.length === 0) return;
-
     // Determine active scope: from form data if top button, or forced if row button
     const activeScope = selectedBill ? 'unit' : data.scope;
     
-    // Construct exact JSON payload based on scope
+    // Construct exact JSON payload based on scope (Only 'others' type now)
+    const payloadItems = (data.items || []).map(item => {
+      const base = { type: "others" };
+      base.note = item.note;
+      base.total_amount = Number(item.total_amount) || 0;
+      return base;
+    });
+
     const payload = {
       scope: activeScope,
-      items: data.items.map(item => {
-        const base = { type: item.type };
-        if (item.type === 'others') {
-          base.note = item.note;
-          base.total_amount = Number(item.total_amount);
-        } else if (item.type === 'electricity') {
-          base.per_unit_price = Number(item.per_unit_price);
-        }
-        return base;
-      })
+      items: payloadItems
     };
 
     if (activeScope === 'unit' && selectedBill) {
@@ -250,7 +270,7 @@ const Bills_Dashboard = () => {
       payload.target_property_id = Number(data.target_property_id);
     }
 
-    await CreateRentInvoice(JSON.stringify(payload, null, 2))
+    await CreateRentInvoice(JSON.stringify(payload, null, 2));
 
     // Determine target unit IDs
     let targetUnitIds = [];
@@ -266,40 +286,33 @@ const Bills_Dashboard = () => {
       targetUnitIds = units.map(u => u.id); // Fallback
     }
 
-    // Update bills state
-    setBills(prev => {
-      const safePrev = Array.isArray(prev) ? prev : [];
-      const updatedBills = [...safePrev];
-      targetUnitIds.forEach(unitId => {
-        if (!unitId) return;
-        const existingIdx = updatedBills.findIndex(b => b.unit_id == unitId && b.year === currentYear && b.month === currentMonth);
-        let billObj = existingIdx >= 0
-          ? { ...updatedBills[existingIdx], items: [...updatedBills[existingIdx].items] }
-          : { id: `bill_${Date.now()}_${unitId}`, unit_id: unitId, renter_id: null, year: currentYear, month: currentMonth, status: 'unpaid', total_amount: 0, items: [] };
+    // Update bills state locally if there are items
+    if (data.items && data.items.length > 0) {
+      setBills(prev => {
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const updatedBills = [...safePrev];
+        targetUnitIds.forEach(unitId => {
+          if (!unitId) return;
+          const existingIdx = updatedBills.findIndex(b => b.unit_id == unitId && b.year === currentYear && b.month === currentMonth);
+          let billObj = existingIdx >= 0
+            ? { ...updatedBills[existingIdx], items: [...updatedBills[existingIdx].items] }
+            : { id: `bill_${Date.now()}_${unitId}`, unit_id: unitId, renter_id: null, year: currentYear, month: currentMonth, status: 'unpaid', total_amount: 0, items: [] };
 
-        let rentAmount = billObj.items.find(i => i.item_type === 'rent')?.amount || 0;
+          let rentAmount = billObj.items.find(i => i.item_type === 'rent')?.amount || 0;
 
-        data.items.forEach(item => {
-          if (item.type === 'electricity') {
-            let elecItem = billObj.items.find(i => i.item_type === 'electricity');
-            if (!elecItem) {
-              elecItem = { id: Date.now() + Math.random(), item_type: 'electricity', amount: 0, description: 'Electricity Bill' };
-              billObj.items.push(elecItem);
-            }
-            elecItem.amount = Number(item.per_unit_price) || 0;
-          } else if (item.type === 'others') {
+          data.items.forEach(item => {
             const otherItem = { id: Date.now() + Math.random(), item_type: 'others', amount: Number(item.total_amount) || 0, description: item.note || 'Other Charge' };
             billObj.items.push(otherItem);
-          }
-        });
+          });
 
-        billObj.total_amount = rentAmount + billObj.items.reduce((acc, curr) => curr.item_type !== 'rent' ? acc + curr.amount : acc, 0);
-        
-        if (existingIdx >= 0) updatedBills[existingIdx] = billObj;
-        else updatedBills.push(billObj);
+          billObj.total_amount = rentAmount + billObj.items.reduce((acc, curr) => curr.item_type !== 'rent' ? acc + curr.amount : acc, 0);
+          
+          if (existingIdx >= 0) updatedBills[existingIdx] = billObj;
+          else updatedBills.push(billObj);
+        });
+        return updatedBills;
       });
-      return updatedBills;
-    });
+    }
 
     closeModal();
   };
@@ -325,7 +338,7 @@ const Bills_Dashboard = () => {
     if (water > 0) newItems.push({ id: idCounter++, item_type: "water", amount: water, description: "Water Bill" });
     if (others > 0) newItems.push({ id: idCounter++, item_type: "others", amount: others, description: "Other Charges" });
 
-    const updatedBills = bills.map(b => {
+    const updatedBills = (bills || []).map(b => {
       if (b.id === selectedBill.id) {
         return { ...b, total_amount: total, items: newItems };
       }
@@ -338,18 +351,36 @@ const Bills_Dashboard = () => {
 
   const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  const getAvailableOptions = (index) => {
-    const billTypeOptions = [{ value: "electricity", label: "Electricity" }, { value: "others", label: "Others" }];
-    const otherSelectedTypes = watchedBills.filter((_, i) => i !== index).map(b => b?.type).filter(Boolean);
-    return billTypeOptions.filter(opt => opt.value === "others" || !otherSelectedTypes.includes(opt.value));
+  const getAvailableOptions = () => {
+    return [{ value: "others", label: "Others" }];
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className=" font-sans p-1 md:p-8">
+      <div className="md:max-w-7xl mx-auto space-y-6">
         <div className="mb-2">
-          <h1 className="text-3xl font-bold text-black mb-1">Bills Dashboard</h1>
-          <p className="text-gray-600 text-lg">Track and manage unit bills</p>
+          <h1 className="text-3xl font-bold text-black mb-2">Rent Management</h1>
+          <p className="text-gray-600 text-lg">Track invoices, monthly billing</p>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Total Collected', value: `৳${totalCollected.toLocaleString()}`, icon: CheckCircle, color: 'bg-green-400' },
+            { label: 'Total Due', value: `৳${totalDue.toLocaleString()}`, icon: Clock, color: 'bg-yellow-400' },
+            { label: 'This Month Income', value: `৳${thisMonthIncome.toLocaleString()}`, icon: DollarSign, color: 'bg-blue-400' },
+            { label: 'Overdue Invoices', value: overdueCount, icon: AlertCircle, color: 'bg-red-400' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white border-2 border-black rounded-xl p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all duration-200">
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-12 h-12 ${stat.color} border-2 border-black rounded-lg flex items-center justify-center`}>
+                  <stat.icon className="w-6 h-6 text-black" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-1">{stat.value}</h3>
+              <p className="text-gray-600 text-sm font-medium">{stat.label}</p>
+            </div>
+          ))}
         </div>
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -360,7 +391,7 @@ const Bills_Dashboard = () => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-3 w-full md:w-1/2">
             <button onClick={openAddOtherBillsModal} className="w-full bg-blue-400 border-2 border-black rounded-lg px-6 py-3 font-bold text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-500 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-center space-x-2">
               <Plus className="w-5 h-5" />
               <span>Add Other Bills</span>
@@ -445,7 +476,45 @@ const Bills_Dashboard = () => {
               <p className="text-sm text-gray-600">Bills with amounts of $0 will be created. You can edit each bill afterward. Existing bills for this period will not be overwritten.</p>
               <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-black">
                 <button onClick={() => setIsGenerateConfirmOpen(false)} className="bg-white border-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all">Cancel</button>
-                <button onClick={handleGenerateAllRents} disabled={isLoading} className="bg-purple-400 border-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-px active:translate-y-px transition-all">{isLoading ? 'Generating...' : 'Confirm & Generate'}</button>
+                <button 
+                  onClick={handleGenerateAllRents} 
+                  disabled={isLoading} 
+                  className={`border-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-px active:translate-y-px transition-all ${
+                      isLoading
+                        ? "bg-gray-400 cursor-not-allowed opacity-75"
+                        : "bg-purple-400 hover:bg-purple-500"
+                    }`
+                  }
+                >
+                  {isLoading ? 
+                    <span className="flex items-center justify-center gap-2">
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Generating...
+                    </span>
+                  
+                  : 
+                    'Confirm & Generate'
+                  }
+                </button>
               </div>
             </div>
           </div>
@@ -468,8 +537,8 @@ const Bills_Dashboard = () => {
                   <div>
                     <label className="block text-sm font-bold text-black mb-2">* Apply To</label>
                     <div className="grid md:grid-cols-3 gap-2">
-                      {[{ value: 'unit', label: 'Single Unit' }, { value: 'property', label: 'Property' }, { value: 'all', label: 'All Units' }].map(opt => (
-                        <button key={opt.value} type="button" onClick={() => resetForm(val => ({ ...val, scope: opt.value, target_unit_id: '', target_property_id: '' }))} className={`p-2 border-2 border-black rounded-lg text-sm text-black font-bold transition-all ${watchedScope === opt.value ? 'bg-yellow-300 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'bg-white hover:bg-gray-100'}`}>{opt.label}</button>
+                      {[{ value: 'property', label: 'Property' }, { value: 'all', label: 'All Units' }].map(opt => (
+                        <button key={opt.value} type="button" onClick={() => resetForm(val => ({ ...val, scope: opt.value, target_property_id: '' }))} className={`p-2 border-2 border-black rounded-lg text-sm text-black font-bold transition-all ${watchedScope === opt.value ? 'bg-yellow-300 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'bg-white hover:bg-gray-100'}`}>{opt.label}</button>
                       ))}
                     </div>
                   </div>
@@ -512,53 +581,67 @@ const Bills_Dashboard = () => {
                   {items.length === 0 && <p className="text-sm text-gray-500 italic mb-2">Click "Add Bill Type" to start</p>}
                   
                   {items.map((field, index) => {
-                    const currentBillType = watchedBills[index]?.type;
-                    const availableOptions = getAvailableOptions(index);
+                    const availableOptions = getAvailableOptions();
                     return (
                       <div key={field.id} className="mb-3 p-3 bg-white border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] relative">
                         <button type="button" onClick={() => remove(index)} className="absolute top-2 right-2 bg-red-400 border-2 border-black rounded w-6 h-6 flex items-center justify-center text-black font-bold hover:bg-red-500 transition-all shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"><X className="w-3 h-3" /></button>
                         <div className="grid grid-cols-1 gap-3 mt-3">
-                          <div>
-                            <label className="block text-xs font-bold text-black mb-1">* Bill Type</label>
-                            <select className="w-full bg-white border-2 border-black rounded-lg py-1.5 px-3 text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] focus:outline-none transition-all cursor-pointer appearance-none text-sm" {...register(`items.${index}.type`, { required: "Required" })} style={{ color: '#000000' }}>
-                              <option value="" disabled>Select Type</option>
-                              {availableOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                            </select>
-                            {errors.items?.[index]?.type && <span className="text-red-500 text-xs mt-1 block">{errors.items[index]?.type?.message}</span>}
-                          </div>
-                          {currentBillType === "electricity" && (
+                          <div className="grid md:grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-xs font-bold text-black mb-1">* Per Unit Price</label>
-                              <input type="number" placeholder="e.g. 12.23" className="w-full bg-white border-2 border-black rounded-lg py-1.5 px-3 text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all text-sm" {...register(`items.${index}.per_unit_price`, { required: "* Required" })} />
-                              {errors.items?.[index]?.per_unit_price && <span className="text-red-500 text-xs mt-1 block">{errors.items[index]?.per_unit_price?.message}</span>}
+                              <label className="block text-xs font-bold text-black mb-1">* Note</label>
+                              <input type="text" placeholder="e.g. Internet" className="w-full bg-white border-2 border-black rounded-lg py-1.5 px-3 text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all text-sm" {...register(`items.${index}.note`, { required: "* Required" })} />
+                              {errors.items?.[index]?.note && <span className="text-red-500 text-xs mt-1 block">{errors.items[index]?.note?.message}</span>}
                             </div>
-                          )}
-                          {currentBillType === "others" && (
-                            <div className="grid md:grid-cols-2 gap-3">
-                              <div>
-                                <label className="block text-xs font-bold text-black mb-1">* Note</label>
-                                <input type="text" placeholder="e.g. Internet" className="w-full bg-white border-2 border-black rounded-lg py-1.5 px-3 text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all text-sm" {...register(`items.${index}.note`, { required: "* Required" })} />
-                                {errors.items?.[index]?.note && <span className="text-red-500 text-xs mt-1 block">{errors.items[index]?.note?.message}</span>}
-                              </div>
-                              <div>
-                                <label className="block text-xs font-bold text-black mb-1">* Amount</label>
-                                <input type="number" placeholder="0.00" className="w-full bg-white border-2 border-black rounded-lg py-1.5 px-3 text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all text-sm" {...register(`items.${index}.total_amount`, { required: "* Required" })} />
-                                {errors.items?.[index]?.total_amount && <span className="text-red-500 text-xs mt-1 block">{errors.items[index]?.total_amount?.message}</span>}
-                              </div>
+                            <div>
+                              <label className="block text-xs font-bold text-black mb-1">* Amount</label>
+                              <input type="number" placeholder="0.00" className="w-full bg-white border-2 border-black rounded-lg py-1.5 px-3 text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all text-sm" {...register(`items.${index}.total_amount`, { required: "* Required" })} />
+                              {errors.items?.[index]?.total_amount && <span className="text-red-500 text-xs mt-1 block">{errors.items[index]?.total_amount?.message}</span>}
                             </div>
-                          )}
+                          </div>
                         </div>
                       </div>
                     );
                   })}
 
-                  <button type="button" onClick={() => append({ type: "", per_unit_price: "", note: "", total_amount: "" })} className="w-full bg-yellow-300 border-2 border-black rounded-lg px-4 py-2 font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-center space-x-2"><Plus className="w-4 h-4" /><span>Add Bill Type</span></button>
+                  <button type="button" onClick={() => append({ note: "", total_amount: "" })} className="w-full bg-yellow-300 border-2 border-black rounded-lg px-4 py-2 font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-center space-x-2"><Plus className="w-4 h-4" /><span>Add Bill Type</span></button>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 space-x-3 gap-3 p-4 pt-0 border-t-2 border-black mt-4 shrink-0 bg-gray-200">
                 <button type="button" onClick={closeModal} className="bg-white border-2 mt-2 w-full border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all">Cancel</button>
-                <button type="submit" className="bg-green-400 border-2 mt-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-px active:translate-y-px transition-all">Apply Bills</button>
+                <button 
+                  type="submit" 
+                  className={`${isLoading ? "bg-gray-100 cursor-not-allowed opacity-75" : "bg-green-400" }     border-2 mt-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-px active:translate-y-px transition-all`}
+                  >
+                    {isLoading ? 
+                    <span className="flex items-center justify-center gap-2">
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Applying Bills..
+                    </span>
+                  
+                  : 
+                    'Apply Bills'
+                  }
+                  </button>
               </div>
             </form>
           </div>
@@ -623,6 +706,7 @@ const Bills_Dashboard = () => {
                       <div className="grid grid-cols-4 gap-2 text-center">
                         <div className="p-2 bg-gray-50 border border-gray-300 rounded"><span className="text-xs text-gray-500 block">Rent</span><span className="font-bold text-sm text-black">${formatAmount(item.rent)}</span></div>
                         <div className="p-2 bg-gray-50 border border-gray-300 rounded"><span className="text-xs text-gray-500 block">Electric</span><span className="font-bold text-sm text-black">${formatAmount(item.electricity)}</span></div>
+                        <div className="p-2 bg-gray-50 border border-gray-300 rounded"><span className="text-xs text-gray-500 block">Others</span><span className="font-bold text-sm text-black">${formatAmount(item.total_amount - (item.rent + item.electricity))}</span></div>
                       </div>
                       {index < historyData.length - 1 && (
                         <div className="mt-2 flex items-center space-x-2 text-sm text-gray-500">

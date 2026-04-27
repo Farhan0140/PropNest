@@ -13,7 +13,7 @@ const AddNewElectricityUnitForm = ({closeModal, selectedReading}) => {
     electricityReadings, 
     setElectricityReadings,
     CreateElectricityReading, 
-    setIsLoading 
+    isLoading 
   } = useAdminContext();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
@@ -228,10 +228,10 @@ const AddNewElectricityUnitForm = ({closeModal, selectedReading}) => {
             <button type="button" onClick={closeModal} className="bg-white border-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all">Cancel</button>
             <button 
               type="submit"
-              disabled={setIsLoading}
+              disabled={isLoading}
               className="bg-green-400 border-2 border-black rounded-lg px-4 py-2 font-semibold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {setIsLoading ? 
+              {isLoading ? 
                   <span className="flex items-center justify-center gap-2">
                     <svg
                       className="animate-spin h-5 w-5"

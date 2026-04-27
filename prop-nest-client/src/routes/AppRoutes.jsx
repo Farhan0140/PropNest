@@ -15,6 +15,9 @@ import ProtectedRoute from "./ProtectedRoute.jsx";
 import NotFoundOrError from "../components/Message/NotFoundOrError.jsx";
 import LoadingAnimation from "../components/Message/LoadingAnimation.jsx";
 import Bills_Dashboard from "../components/Admin_Dashboard/Bills_Dashboard.jsx";
+import Renter_Side_Bar from "../components/Renter_Dashboard/Renter_Side_Bar.jsx";
+import Renter_Main_Dashboard from "../components/Renter_Dashboard/Renter_Main_Dashboard.jsx";
+import Payment_Dashboard from "../components/Admin_Dashboard/Payment_Dashboard.jsx";
 
 const AppRoutes = () => {
   return (
@@ -37,7 +40,12 @@ const AppRoutes = () => {
           <Route path="rent-management-dashboard" element={<Rent_Management_Dashboard />} />
           <Route path="electricity-dashboard" element={<Electricity_Bill_Dashboard />} />
           <Route path="bills-dashboard" element={<Bills_Dashboard />} />
+          <Route path="payment-dashboard" element={<Payment_Dashboard />} />
         </Route>
+      </Route>
+
+      <Route path="renter-dashboard" element={<Renter_Side_Bar />}>
+        <Route index element={<Renter_Main_Dashboard />} />
       </Route>
 
       <Route>

@@ -36,3 +36,15 @@ func NewConnection(connStr string) (*sqlx.DB, error) {
 
 	return dbCon, nil
 }
+
+func NewConnectionOffline(cnf *config.DBConfig) (*sqlx.DB, error) {
+	dbSource := getConnectionString(cnf)
+
+	dbCon, err := sqlx.Connect("pgx", dbSource)
+	if err != nil {
+		fmt.Println("DB Connection: ", err)
+		return nil, err
+	}
+
+	return dbCon, nil
+}

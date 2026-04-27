@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { 
   Building, Home, Users, CreditCard, DollarSign, 
   Wrench, Plus, CheckCircle, AlertCircle, Clock,
@@ -10,10 +10,37 @@ import AddUnitForm from '../modals/AddUnitForm';
 
 const Main_Dashboard = () => {
 
-  const { properties, units } = useAdminContext();
+  const { properties, units, rentInvoice } = useAdminContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  const [bills, setBills] = useState(rentInvoice);
+
+  useEffect(() => {
+    setBills(rentInvoice);
+  }, [rentInvoice]);
+
+  // Summary statistics
+  const { totalCollected, totalDue, thisMonthIncome, overdueCount } = useMemo(() => {
+    const allBills = bills || [];
+    const collected = allBills.filter(b => b.status === 'paid').reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const due = allBills.filter(b => b.status === 'unpaid').reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const thisMonth = allBills
+      .filter(b => b.status === 'paid' && b.year === currentYear && b.month === currentMonth)
+      .reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const overdue = allBills.filter(b => {
+      if (b.status !== 'unpaid') return false;
+      // Overdue if before current month/year
+      return b.year < currentYear || (b.year === currentYear && b.month < currentMonth);
+    }).length;
+
+    return { totalCollected: collected, totalDue: due, thisMonthIncome: thisMonth, overdueCount: overdue };
+  }, [bills, currentYear, currentMonth]);
 
   const maintenanceRequests = [
     { id: 1, title: 'Tap Leaking', unit: 'Unit 304', property: 'Green House', renter: 'John Smith', priority: 'urgent', status: 'pending', date: '2024-01-15', notes: [] },
@@ -22,14 +49,14 @@ const Main_Dashboard = () => {
     { id: 4, title: 'Door Lock Broken', unit: 'Unit 402', property: 'Green House', renter: 'Emily Davis', priority: 'urgent', status: 'completed', date: '2024-01-14', notes: ['Fixed', 'New lock installed'] },
   ];
 
-  // TODO in stats fix monthly rent collected, pending rent, total expenses, maintenance requests
+  // TODO in stats fix total expenses, maintenance requests
   const stats = [
     { label: 'Total Properties', value: properties?.length || 0, icon: Building, color: 'bg-blue-400' },
     { label: 'Total Units', value: units?.length || 0, icon: Home, color: 'bg-green-400' },
     { label: 'Occupied Units', value: units?.filter(u => u.status === 'occupied').length || 0, icon: CheckCircle, color: 'bg-green-400' },
     { label: 'Available Units', value: units?.filter(u => u.status === 'available').length || 0, icon: AlertCircle, color: 'bg-yellow-400' },
-    { label: 'Monthly Rent Collected', value: '৳67,890', icon: CreditCard, color: 'bg-green-400' },
-    { label: 'Pending Rent', value: '৳12,450', icon: Clock, color: 'bg-orange-400' },
+    { label: 'Total Rent Collected', value: `৳${totalCollected.toLocaleString()}`, icon: CreditCard, color: 'bg-green-400' },
+    { label: 'Pending Rent', value: `৳${totalDue.toLocaleString()}`, icon: Clock, color: 'bg-orange-400' },
     { label: 'Total Expenses', value: '৳23,100', icon: DollarSign, color: 'bg-red-400' },
     { label: 'Maintenance Requests', value: maintenanceRequests.length, icon: Wrench, color: 'bg-blue-400' },
   ];

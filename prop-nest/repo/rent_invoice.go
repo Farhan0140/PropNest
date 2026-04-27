@@ -28,16 +28,16 @@ type InvoiceItemResponse struct {
 }
 
 type RentInvoiceResponse struct {
-	ID          int64                 `json:"id" db:"id"`
-	RenterID    int                   `json:"renter_id" db:"renter_id"`
-	UnitID      int                   `json:"unit_id" db:"unit_id"`
-	Month       int                   `json:"month" db:"month"`
-	Year        int                   `json:"year" db:"year"`
-	Status      string                `json:"status" db:"status"`
-	TotalAmount float64               `json:"total_amount" db:"total_amount"`
-	Items       []InvoiceItemResponse `json:"items"`
+	ID              int64                 `json:"id" db:"id"`
+	RenterID        int                   `json:"renter_id" db:"renter_id"`
+	UnitID          int                   `json:"unit_id" db:"unit_id"`
+	Month           int                   `json:"month" db:"month"`
+	Year            int                   `json:"year" db:"year"`
+	Status          string                `json:"status" db:"status"`
+	TotalAmount     float64               `json:"total_amount" db:"total_amount"`
+	TotalPaidAmount float64               `json:"total_paid_amount" db:"total_paid_amount"`
+	Items           []InvoiceItemResponse `json:"items"`
 }
-
 
 type RentInvoiceRepo interface {
 	Create(req CreateInvoiceRequest) ([]RentInvoiceResponse, error)
@@ -294,77 +294,6 @@ func (r *rentInvoiceRepo) Create(req CreateInvoiceRequest) ([]RentInvoiceRespons
 	return responses, tx.Commit()
 }
 
-/*
-
-Creating for all units for every property
-{
-  "scope": "all",
-  "items": [
-    {
-      "type": "others",
-      "note": "Cleaning charge",
-      "total_amount": 500
-    },
-    {
-      "type": "others",
-      "note": "Maintenance",
-      "total_amount": 1200
-    }
-  ]
-}
-
-
-
-Creating for all units for specific property
-{
-  "scope": "property",
-  "target_property_id": 2,
-  "items": [
-    {
-      "type": "others",
-      "note": "Cleaning",
-      "total_amount": 500
-    },
-    {
-      "type": "others",
-      "note": "Maintenance",
-      "total_amount": 1200
-    },
-    {
-      "type": "others",
-      "note": "Security",
-      "total_amount": 200
-    }
-  ]
-}
-
-
-
-Creating for single unit
-{
-  "scope": "unit",
-  "target_unit_id": 32,
-  "items": [
-    {
-      "type": "others",
-      "note": "Cleaning charge",
-      "total_amount": 500
-    },
-    {
-      "type": "others",
-      "note": "Maintenance fee",
-      "total_amount": 1200
-    },
-    {
-      "type": "others",
-      "note": "Security",
-      "total_amount": 500
-    }
-  ]
-}
-
-*/
-
 func (r *rentInvoiceRepo) List() ([]RentInvoiceResponse, error) {
 
 	tx, err := r.db.Beginx()
@@ -384,7 +313,8 @@ func (r *rentInvoiceRepo) List() ([]RentInvoiceResponse, error) {
 			month,
 			year,
 			status,
-			total_amount
+			total_amount,
+			total_paid_amount
 		FROM rent_invoices
 		ORDER BY year DESC, month DESC, id DESC
 	`)

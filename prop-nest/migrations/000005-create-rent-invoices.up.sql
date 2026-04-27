@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS rent_invoices (
     rent_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
     late_fee NUMERIC(10,2) DEFAULT 0,
     total_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+    total_paid_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
 
     status VARCHAR(20) DEFAULT 'unpaid'
     CHECK (status IN ('paid', 'unpaid', 'partial')),

@@ -14,7 +14,7 @@ import {
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import useAuthContext from '../../hooks/Auth/useAuthContext';
 
-const Side_Bar = () => {
+const Renter_Side_Bar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [notificationCount, setNotificationCount] = useState(3);
@@ -84,7 +84,7 @@ const Side_Bar = () => {
       label: 'Payments',
       icon: CreditCard,
       submenus: {
-        paymentHistory: { label: 'Payment', path: 'payment-dashboard' },
+        paymentHistory: { label: 'Payment History', path: '/payments/history' },
         invoices: { label: 'Invoices', path: '/payments/invoices' },
         paymentSettings: { label: 'Payment Settings', path: '/payments/settings' }
       }
@@ -397,4 +397,4 @@ const Side_Bar = () => {
   );
 };
 
-export default Side_Bar;
+export default Renter_Side_Bar;
