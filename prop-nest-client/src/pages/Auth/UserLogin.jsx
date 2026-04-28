@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import useAuthContext from '../../hooks/Auth/useAuthContext';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 
 const UserLogin = () => {
   const [showPassword, setShowPassword] = useState(true);
@@ -24,8 +25,18 @@ const UserLogin = () => {
     if (res.success) {
       setLoginErr(false);
       setLoginSuccess(res.success);
-      // TODO add dashboard route to redirect user role based
-      setTimeout(() => navigate("/admin-dashboard"), 2000)
+
+      const token = res.token;
+      // decode token
+      const decoded = jwtDecode(token);
+      const role = decoded.role;
+      console.log(role);
+      
+      if(role === "admin") {
+        setTimeout(() => navigate("/admin-dashboard"), 2000);
+      } else {
+        setTimeout(() => navigate("/renter-dashboard"), 2000);
+      }
     } else {
       setLoginErr(true);
     }

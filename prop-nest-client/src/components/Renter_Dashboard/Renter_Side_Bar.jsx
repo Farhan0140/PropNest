@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Bell,
   Receipt,
+  ReceiptText,
 } from 'lucide-react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import useAuthContext from '../../hooks/Auth/useAuthContext';
@@ -42,62 +43,31 @@ const Renter_Side_Bar = () => {
       id: 0,
       label: 'Dashboard',
       icon: LayoutDashboard,
-      to: "/admin-dashboard"
+      to: "/renter-dashboard"
     },
     {
       id: 1,
-      label: 'Property',
-      icon: Building2,
-      submenus: {
-        properties: { label: 'Properties', path: 'property-dashboard' },
-        units: { label: 'Units', path: 'unit-dashboard' },
-      }
+      label: 'Invoices',
+      icon: ReceiptText,
+      to: ""
     },
     {
       id: 2,
-      label: 'Renter',
-      icon: Users,
-      submenus: {
-        tenantList: { label: 'Renter List', path: 'renter-dashboard' },
-        currentRenters: {label: 'Current Renters', path: 'current-renter-dashboard'},
-        previousRenters: {label: 'Previous Renters', path: 'previous-renter-dashboard'}
-      }
+      label: 'Payments',
+      icon: CreditCard,
+      to: ""
     },
     {
       id: 3,
-      label: 'Bills',
-      icon: Receipt,
-      submenus: {
-        electricity: { label: 'Electricity', path: 'electricity-dashboard' },
-      }
+      label: 'Maintenance',
+      icon: Settings,
+      to: ""
     },
     {
       id: 4,
-      label: 'Rent History',
-      icon:  Building2,
-      submenus: {
-        allRents: {label: 'All Rents', path: 'bills-dashboard'},
-      }
-    },
-    {
-      id: 5,
-      label: 'Payments',
-      icon: CreditCard,
-      submenus: {
-        paymentHistory: { label: 'Payment History', path: '/payments/history' },
-        invoices: { label: 'Invoices', path: '/payments/invoices' },
-        paymentSettings: { label: 'Payment Settings', path: '/payments/settings' }
-      }
-    },
-    {
-      id: 6,
-      label: 'Settings',
-      icon: Settings,
-      submenus: {
-        general: { label: 'General', path: '/settings/general' },
-        security: { label: 'Security', path: '/settings/security' },
-        notifications: { label: 'Notifications', path: '/settings/notifications' }
-      }
+      label: 'Profile',
+      icon:  User,
+      to: ""
     }
   ];
 

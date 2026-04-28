@@ -8,20 +8,20 @@ import {
   DollarSign
 } from 'lucide-react';
 
-const Renter_Main_Dashboard = () => {
+const Tenant_Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Mock Tenant Data
   const [tenantProfile, setTenantProfile] = useState({
-    name: 'Rahim Ahmed',
-    email: 'rahim@example.com',
-    phone: '+880 1712-345678',
+    name: 'Farhan Nadim',
+    email: 'farhan@gmail.com',
+    phone: '0140327730',
     nid: '1234567890',
     emergencyContact: '+880 1998-765432',
-    unit: 'A102',
-    property: 'Sunrise Apartments',
+    unit: '102',
+    property: 'White House',
     leaseStart: 'Jan 2024',
     leaseEnd: 'Dec 2026',
     monthlyRent: 12000
@@ -54,7 +54,7 @@ const Renter_Main_Dashboard = () => {
   const [editProfile, setEditProfile] = useState(false);
   const [profileForm, setProfileForm] = useState(tenantProfile);
 
-  const currentMonth = 'February 2026';
+  const currentMonth = 'April 2026';
   const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
   const totalDue = invoices.reduce((sum, inv) => sum + inv.due, 0);
   const lastPayment = payments[0];
@@ -116,7 +116,56 @@ const Renter_Main_Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans flex">
+      {/* Sidebar */}
+      <aside className={`fixed md:relative z-40 h-screen bg-gray-200 border-r-2 border-black transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'} hidden md:flex flex-col`}>
+        <div className="p-4 border-b-2 border-black flex items-center justify-between">
+          {isSidebarOpen && <h1 className="text-xl font-bold text-black truncate">Renter Portal</h1>}
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="bg-white border-2 border-black rounded p-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 transition-all">
+            <ChevronRight className={`w-5 h-5 text-black transition-transform ${isSidebarOpen ? '' : 'rotate-180'}`} />
+          </button>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-2">
+          {navItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 transition-all ${
+                activeTab === item.id ? 'bg-blue-300 text-black' : 'bg-white text-gray-700 hover:bg-gray-50'
+              } ${!isSidebarOpen && 'justify-center'}`}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {isSidebarOpen && <span>{item.label}</span>}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t-2 border-black">
+          <div className={`bg-white border-2 border-black rounded-lg p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${!isSidebarOpen && 'hidden'}`}>
+            <p className="text-xs text-gray-500">Logged in as</p>
+            <p className="font-bold text-black truncate">{tenantProfile.name}</p>
+            <p className="text-xs text-gray-500 truncate">{tenantProfile.unit} - {tenantProfile.property}</p>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Bottom Nav */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-gray-200 border-t-2 border-black flex justify-around p-2">
+        {navItems.map(item => (
+          <button
+            key={item.id}
+            onClick={() => setActiveTab(item.id)}
+            className={`flex flex-col items-center p-2 rounded ${activeTab === item.id ? 'text-blue-600' : 'text-gray-500'}`}
+          >
+            <item.icon className="w-6 h-6" />
+            <span className="text-xs">{item.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Main Content */}
       <main className="flex-1 p-4 md:p-8 mb-20 md:mb-0 overflow-auto">
+        
 
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
@@ -569,4 +618,4 @@ const Renter_Main_Dashboard = () => {
   );
 };
 
-export default Renter_Main_Dashboard;
+export default Tenant_Dashboard;

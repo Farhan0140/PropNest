@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Building, Home, Users, CreditCard, DollarSign, 
   Wrench, Plus, CheckCircle, AlertCircle, Clock,
@@ -9,8 +9,7 @@ import AddPropertyForm from '../modals/AddPropertyForm';
 import AddUnitForm from '../modals/AddUnitForm';
 
 const Main_Dashboard = () => {
-
-  const { properties, units, rentInvoice } = useAdminContext();
+  const { properties, units, rentInvoice, maintenanceRequests } = useAdminContext() || {};
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
@@ -25,40 +24,60 @@ const Main_Dashboard = () => {
     setBills(rentInvoice);
   }, [rentInvoice]);
 
+  // Helper to get unit name safely
+  const getUnitName = (unitId) => {
+    const unit = units?.find(u => u?.id === unitId);
+    return unit?.unit_name || `Unit ${unitId || 'N/A'}`;
+  };
+
   // Summary statistics
   const { totalCollected, totalDue, thisMonthIncome, overdueCount } = useMemo(() => {
     const allBills = bills || [];
-    const collected = allBills.filter(b => b.status === 'paid').reduce((sum, b) => sum + (b.total_amount || 0), 0);
-    const due = allBills.filter(b => b.status === 'unpaid').reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const collected = allBills.filter(b => b?.status === 'paid').reduce((sum, b) => sum + (b?.total_amount || 0), 0);
+    const due = allBills.filter(b => b?.status === 'unpaid').reduce((sum, b) => sum + (b?.total_amount || 0), 0);
     const thisMonth = allBills
-      .filter(b => b.status === 'paid' && b.year === currentYear && b.month === currentMonth)
-      .reduce((sum, b) => sum + (b.total_amount || 0), 0);
+      .filter(b => b?.status === 'paid' && b?.year === currentYear && b?.month === currentMonth)
+      .reduce((sum, b) => sum + (b?.total_amount || 0), 0);
     const overdue = allBills.filter(b => {
-      if (b.status !== 'unpaid') return false;
+      if (b?.status !== 'unpaid') return false;
       // Overdue if before current month/year
-      return b.year < currentYear || (b.year === currentYear && b.month < currentMonth);
+      return b?.year < currentYear || (b?.year === currentYear && (b?.month || 0) < currentMonth);
     }).length;
 
     return { totalCollected: collected, totalDue: due, thisMonthIncome: thisMonth, overdueCount: overdue };
   }, [bills, currentYear, currentMonth]);
 
-  const maintenanceRequests = [
-    { id: 1, title: 'Tap Leaking', unit: 'Unit 304', property: 'Green House', renter: 'John Smith', priority: 'urgent', status: 'pending', date: '2024-01-15', notes: [] },
-    { id: 2, title: 'AC Not Cooling', unit: 'Unit 201', property: 'Sunset Apartments', renter: 'Sarah Johnson', priority: 'medium', status: 'in-progress', date: '2024-01-15', notes: ['Technician assigned'] },
-    { id: 3, title: 'Electrical Outlet', unit: 'Unit 105', property: 'Downtown Lofts', renter: 'Mike Brown', priority: 'high', status: 'pending', date: '2024-01-14', notes: [] },
-    { id: 4, title: 'Door Lock Broken', unit: 'Unit 402', property: 'Green House', renter: 'Emily Davis', priority: 'urgent', status: 'completed', date: '2024-01-14', notes: ['Fixed', 'New lock installed'] },
-  ];
+  const priorityColors = {
+    low: 'bg-green-200 border-green-500 text-green-800',
+    medium: 'bg-yellow-200 border-yellow-500 text-yellow-800',
+    high: 'bg-orange-200 border-orange-500 text-orange-800',
+    urgent: 'bg-red-200 border-red-500 text-red-800'
+  };
 
-  // TODO in stats fix total expenses, maintenance requests
+  const statusColors = {
+    pending: 'bg-yellow-200 border-yellow-500 text-yellow-800',
+    in_progress: 'bg-blue-200 border-blue-500 text-blue-800',
+    resolved: 'bg-green-200 border-green-500 text-green-800',
+    rejected: 'bg-gray-200 border-gray-500 text-gray-800'
+  };
+
+  const statusLabels = {
+    pending: 'Pending',
+    in_progress: 'In Progress',
+    resolved: 'Resolved',
+    rejected: 'Rejected'
+  };
+
+  // TODO in stats fix total expenses
   const stats = [
     { label: 'Total Properties', value: properties?.length || 0, icon: Building, color: 'bg-blue-400' },
     { label: 'Total Units', value: units?.length || 0, icon: Home, color: 'bg-green-400' },
-    { label: 'Occupied Units', value: units?.filter(u => u.status === 'occupied').length || 0, icon: CheckCircle, color: 'bg-green-400' },
-    { label: 'Available Units', value: units?.filter(u => u.status === 'available').length || 0, icon: AlertCircle, color: 'bg-yellow-400' },
+    { label: 'Occupied Units', value: units?.filter(u => u?.status === 'occupied').length || 0, icon: CheckCircle, color: 'bg-green-400' },
+    { label: 'Available Units', value: units?.filter(u => u?.status === 'available').length || 0, icon: AlertCircle, color: 'bg-yellow-400' },
     { label: 'Total Rent Collected', value: `৳${totalCollected.toLocaleString()}`, icon: CreditCard, color: 'bg-green-400' },
     { label: 'Pending Rent', value: `৳${totalDue.toLocaleString()}`, icon: Clock, color: 'bg-orange-400' },
     { label: 'Total Expenses', value: '৳23,100', icon: DollarSign, color: 'bg-red-400' },
-    { label: 'Maintenance Requests', value: maintenanceRequests.length, icon: Wrench, color: 'bg-blue-400' },
+    { label: 'Maintenance Requests', value: maintenanceRequests?.length || 0, icon: Wrench, color: 'bg-blue-400' },
   ];
 
   const openModal = (type) => {
@@ -125,26 +144,25 @@ const Main_Dashboard = () => {
           <div className="bg-white border-2 border-black rounded-xl p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)]">
             <h2 className="text-xl font-bold text-black mb-4">Recent Maintenance</h2>
             <div className="space-y-3">
-              {maintenanceRequests.slice(0, 4).map((request) => (
-                <div key={request.id} className="flex items-center justify-between p-3 bg-gray-300 border-2 border-black rounded-lg">
+              {(maintenanceRequests || []).slice(0, 4).map((request) => (
+                <div key={request?.id} className="flex items-center justify-between p-3 bg-gray-100 border-2 border-black rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 border-2 border-black rounded-full flex items-center justify-center ${
-                      request.priority === 'urgent' ? 'bg-red-400' : request.priority === 'high' ? 'bg-orange-400' : 'bg-yellow-400'
-                    }`}>
+                    <div className={`w-10 h-10 border-2 border-black rounded-full flex items-center justify-center ${priorityColors[request?.priority] || 'bg-yellow-400'}`}>
                       <Wrench className="w-5 h-5 text-black" />
                     </div>
                     <div>
-                      <p className="font-bold text-black">{request.title}</p>
-                      <p className="text-sm text-gray-600">{request.unit}</p>
+                      <p className="font-bold text-black">{request?.title || 'Untitled'}</p>
+                      <p className="text-sm text-gray-600">{getUnitName(request?.unit_id)}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-bold border-2 border-black ${
-                    request.status === 'completed' ? 'bg-green-400' : request.status === 'in-progress' ? 'bg-blue-400' : 'bg-gray-300'
-                  }`}>
-                    {request.status}
+                  <span className={`px-2 py-1 rounded text-xs font-bold border ${statusColors[request?.status] || 'bg-gray-200 border-gray-500 text-gray-800'}`}>
+                    {statusLabels[request?.status] || 'Unknown'}
                   </span>
                 </div>
               ))}
+              {(maintenanceRequests?.length || 0) === 0 && (
+                <div className="text-center py-4 text-gray-500">No maintenance requests found.</div>
+              )}
             </div>
           </div>
         </div>

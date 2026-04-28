@@ -18,6 +18,7 @@ import Bills_Dashboard from "../components/Admin_Dashboard/Bills_Dashboard.jsx";
 import Renter_Side_Bar from "../components/Renter_Dashboard/Renter_Side_Bar.jsx";
 import Renter_Main_Dashboard from "../components/Renter_Dashboard/Renter_Main_Dashboard.jsx";
 import Payment_Dashboard from "../components/Admin_Dashboard/Payment_Dashboard.jsx";
+import Maintenance_Dashboard from "../components/Admin_Dashboard/Maintenance_Dashboard.jsx";
 
 const AppRoutes = () => {
   return (
@@ -41,10 +42,11 @@ const AppRoutes = () => {
           <Route path="electricity-dashboard" element={<Electricity_Bill_Dashboard />} />
           <Route path="bills-dashboard" element={<Bills_Dashboard />} />
           <Route path="payment-dashboard" element={<Payment_Dashboard />} />
+          <Route path="maintenance-dashboard" element={<Maintenance_Dashboard />} />
         </Route>
       </Route>
 
-      <Route path="renter-dashboard" element={<Renter_Side_Bar />}>
+      <Route path="renter-dashboard" >
         <Route index element={<Renter_Main_Dashboard />} />
       </Route>
 

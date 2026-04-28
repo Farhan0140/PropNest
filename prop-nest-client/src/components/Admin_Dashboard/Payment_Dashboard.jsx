@@ -331,7 +331,7 @@ const Bills_Dashboard = () => {
                   )}
                   <div className="flex justify-between items-center pt-2 border-t border-dashed border-gray-300">
                     <span className="text-sm font-bold text-black">Current Due:</span>
-                    <span className="text-lg font-bold text-black">{selectedBill.currentDue > 0 ? `$${formatAmount(selectedBill.currentDue)}` : '$0.00'}</span>
+                    <span className="text-lg font-bold text-black">{selectedBill.currentDue > 0 ? `${formatAmount(selectedBill.currentDue)}` : '$0.00'}</span>
                   </div>
                 </div>
 
@@ -379,7 +379,7 @@ const Bills_Dashboard = () => {
                                 <span className="text-xs text-gray-500">${formatAmount(total)} - ${formatAmount(paid)}</span>
                               </div>
                             </div>
-                            <span className="text-sm font-bold text-red-500">$${formatAmount(due)}</span>
+                            <span className="text-sm font-bold text-red-500">${formatAmount(due)}</span>
                           </label>
                         );
                       })}

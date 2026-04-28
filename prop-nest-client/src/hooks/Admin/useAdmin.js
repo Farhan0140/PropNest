@@ -8,6 +8,7 @@ const useAdmin = () => {
   const [renters, setRenters] = useState([]);
   const [electricityReadings, setElectricityReadings] = useState([]);
   const [rentInvoice, setRentInvoice] = useState([]);
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
 
   const [refreshUnits, setRefreshUnits] = useState(0);
 
@@ -84,6 +85,22 @@ const useAdmin = () => {
         const res = await authApiClient.get("/rent-invoices");
         console.log(res.data);
         setRentInvoice(res.data);
+      
+      } catch (error) {
+
+        console.log(error);
+
+      }
+    })();
+  }, [authToken]);
+  
+  useEffect(() => {
+    (async() => {
+      try {
+
+        const res = await authApiClient.get("/maintenance-requests");
+        console.log(res.data);
+        setMaintenanceRequests(res.data);
       
       } catch (error) {
 
@@ -460,6 +477,9 @@ const useAdmin = () => {
     CreateRentInvoice,
     rentInvoice,
     setRentInvoice,
+
+    maintenanceRequests,
+    setMaintenanceRequests,
 
     isDeleting,
   };

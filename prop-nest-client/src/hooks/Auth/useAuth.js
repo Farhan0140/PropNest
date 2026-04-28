@@ -13,24 +13,24 @@ const useAuth = () => {
 
   const [authToken, setAuthToken] = useState(getToken());
 
-  // useEffect(() => {
-  //   if (authToken) {
-  //     fetchUserProfile();
-  //   }
-  // }, [authToken]);
+  useEffect(() => {
+    if (authToken) {
+      fetchUserProfile();
+    }
+  }, [authToken]);
 
-  // // Fetch User
-  // const fetchUserProfile = async () => {
-  //   try {
-  //     const response = await apiClient.get("/users/me", {
-  //       headers: { Authorization: `JWT ${authToken}` },
-  //     });
-  //     setUser(response.data);
-  //     console.log("User ", user);
-  //   } catch ( error ) {
-  //     console.log("Fetching User Error", error);
-  //   }
-  // }
+  // Fetch User
+  const fetchUserProfile = async () => {
+    try {
+      const response = await apiClient.get("/users/me", {
+        headers: { Authorization: `JWT ${authToken}` },
+      });
+      console.log("User ", response.data);
+      setUser(response.data);
+    } catch ( error ) {
+      console.log("Fetching User Error", error);
+    }
+  }
   useEffect(() => {
     const initAuth = async () => {
       if (!authToken) {
@@ -97,9 +97,10 @@ const useAuth = () => {
         password: data.password
       });
       setAuthToken(response?.data);
-      localStorage.setItem("authTokens", response?.data)
+      localStorage.setItem("authTokens", response?.data);
       return {
         success: true,
+        token: response?.data
       }
 
     } catch (error) {

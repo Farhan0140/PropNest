@@ -84,20 +84,14 @@ const Side_Bar = () => {
       label: 'Payments',
       icon: CreditCard,
       submenus: {
-        paymentHistory: { label: 'Payment', path: 'payment-dashboard' },
-        invoices: { label: 'Invoices', path: '/payments/invoices' },
-        paymentSettings: { label: 'Payment Settings', path: '/payments/settings' }
+        paymentHistory: { label: 'Payment', path: 'payment-dashboard' }
       }
     },
     {
       id: 6,
-      label: 'Settings',
+      label: 'Maintenance',
       icon: Settings,
-      submenus: {
-        general: { label: 'General', path: '/settings/general' },
-        security: { label: 'Security', path: '/settings/security' },
-        notifications: { label: 'Notifications', path: '/settings/notifications' }
-      }
+      to: "maintenance-dashboard"
     }
   ];
 
