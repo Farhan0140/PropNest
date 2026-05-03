@@ -42,6 +42,7 @@ type RentInvoiceResponse struct {
 type RentInvoiceRepo interface {
 	Create(req CreateInvoiceRequest) ([]RentInvoiceResponse, error)
 	List() ([]RentInvoiceResponse, error)
+	Get(renterId int) ([]RentInvoiceResponse, error)
 }
 
 type rentInvoiceRepo struct {
@@ -345,6 +346,65 @@ func (r *rentInvoiceRepo) List() ([]RentInvoiceResponse, error) {
 	}
 
 	// 🔹 Commit (important even for read tx)
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return invoices, nil
+}
+
+func (r *rentInvoiceRepo) Get(renterId int) ([]RentInvoiceResponse, error) {
+	fmt.Println("ins", renterId)
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	var invoices []RentInvoiceResponse
+
+	// 🔹 Step 1: Get invoices by renter_id
+	err = tx.Select(&invoices, `
+		SELECT 
+			id,
+			renter_id,
+			unit_id,
+			month,
+			year,
+			status,
+			total_amount,
+			total_paid_amount
+		FROM rent_invoices
+		WHERE renter_id = $1
+		ORDER BY year DESC, month DESC, id DESC
+	`, renterId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 🔹 Step 2: Attach items
+	for i := range invoices {
+
+		var items []InvoiceItemResponse
+
+		err = tx.Select(&items, `
+			SELECT 
+				id,
+				item_type,
+				amount,
+				description
+			FROM invoice_items
+			WHERE invoice_id = $1
+		`, invoices[i].ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		invoices[i].Items = items
+	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}

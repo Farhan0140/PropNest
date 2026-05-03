@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -35,6 +36,18 @@ func NewPropertyInfoRepo(db *sqlx.DB) PropertyInfoRepo {
 	return &propertyInfoRepo{
 		db: db,
 	}
+}
+
+
+func getPrefix(name string) string {
+	words := strings.Fields(name)
+
+	prefix := ""
+	for _, w := range words {
+		prefix += strings.ToUpper(string(w[0]))
+	}
+
+	return prefix
 }
 
 func (r *propertyInfoRepo) Create(propInfo PropertyInfo) (*PropertyInfo, error) {
@@ -78,15 +91,18 @@ func (r *propertyInfoRepo) Create(propInfo PropertyInfo) (*PropertyInfo, error) 
 	}
 
 	var units []map[string]interface{}
+	prefix := getPrefix(propInfo.HouseName)
+
 	for floor := 1; floor <= propInfo.NumberOfFloors; floor++ {
 		for unit_no := 1; unit_no <= propInfo.TotalUnits; unit_no++ {
-			unitName := fmt.Sprintf("%d%02d", floor, unit_no)
+
+			unitName := fmt.Sprintf("%s %d%02d", prefix, floor, unit_no)
 
 			units = append(units, map[string]interface{}{
 				"property_id": property_id,
-				"unit_name": unitName,
-				"rent_amount": propInfo.BaseRent,
-				"status": "available",
+				"unit_name":   unitName,
+				"rent_amount":  propInfo.BaseRent,
+				"status":       "available",
 			})
 		}
 	}
@@ -108,6 +124,7 @@ func (r *propertyInfoRepo) Create(propInfo PropertyInfo) (*PropertyInfo, error) 
 
 	return &propInfo, nil
 }
+
 
 func (r *propertyInfoRepo) List(ownerId int) ([]*PropertyInfo, error) {
 	var propertyLst []*PropertyInfo

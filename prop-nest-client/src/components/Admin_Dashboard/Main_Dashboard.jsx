@@ -4,21 +4,32 @@ import {
   Wrench, Plus, CheckCircle, AlertCircle, Clock,
   FileText, X
 } from 'lucide-react';
-import useAdminContext from '../../hooks/Admin/useAdminContext';
 import AddPropertyForm from '../modals/AddPropertyForm';
 import AddUnitForm from '../modals/AddUnitForm';
+import useAdminContext from '../../hooks/Admin/useAdminContext';
+import { useNavigate } from 'react-router';
 
 const Main_Dashboard = () => {
-  const { properties, units, rentInvoice, maintenanceRequests } = useAdminContext() || {};
+  const { 
+    properties, 
+    units, 
+    rentInvoice, 
+    maintenanceRequests, 
+    renters,
+    CreateInvoice 
+  } = useAdminContext() || {};
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
+  const [selectedRenterId, setSelectedRenterId] = useState('');
 
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
   const [bills, setBills] = useState(rentInvoice);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setBills(rentInvoice);
@@ -68,7 +79,6 @@ const Main_Dashboard = () => {
     rejected: 'Rejected'
   };
 
-  // TODO in stats fix total expenses
   const stats = [
     { label: 'Total Properties', value: properties?.length || 0, icon: Building, color: 'bg-blue-400' },
     { label: 'Total Units', value: units?.length || 0, icon: Home, color: 'bg-green-400' },
@@ -88,6 +98,43 @@ const Main_Dashboard = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setModalType(null);
+    setSelectedRenterId('');
+  };
+
+  const handleGenerateInvoice = async (id) => {
+    console.log(id);
+
+    // const targetList = type === 'all' 
+    //   ? renters 
+    //   : renters?.filter(r => r.id === selectedRenterId);
+
+    // if (!targetList || targetList.length === 0) {
+    //   alert(type === 'selected' ? "Please select a renter first." : "No renters available to generate invoices.");
+    //   return;
+    // }
+
+    navigate(`invoice/${id}`);
+
+    // try {
+    //   if (CreateInvoice) {
+    //     const invoicePayload = targetList.map(r => ({
+    //       renter_id: r.id,
+    //       year: currentYear,
+    //       month: currentMonth
+    //     }));
+        
+    //     // If API expects single call for bulk, adjust accordingly. 
+    //     // Assuming it handles array or you can map over it.
+    //     await CreateInvoice(invoicePayload);
+    //   } else {
+    //     console.warn("CreateInvoice not provided in context. Using mock generation.");
+    //     alert(`Successfully generated invoices for ${targetList.length} renter(s).`);
+    //   }
+    //   closeModal();
+    // } catch (error) {
+    //   console.error("Error generating invoices:", error);
+    //   alert("Failed to generate invoices. Please try again.");
+    // }
   };
 
   return (
@@ -122,19 +169,19 @@ const Main_Dashboard = () => {
           <div className="bg-white border-2 border-black rounded-xl p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)]">
             <h2 className="text-xl font-bold text-black mb-4">Quick Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <button onClick={() => openModal('addProperty')} className="flex items-center space-x-2 px-4 py-3 bg-gray-300 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <button onClick={() => openModal('addProperty')} className="flex items-center space-x-2 px-4 py-3 bg-gray-300 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 transition-all">
                 <Plus className="w-5 h-5 text-black" />
                 <span className="font-medium text-black">Add Property</span>
               </button>
-              <button onClick={() => openModal('addUnit')} className="flex items-center space-x-2 px-4 py-3 bg-gray-300 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <button onClick={() => openModal('addUnit')} className="flex items-center space-x-2 px-4 py-3 bg-gray-300 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 transition-all">
                 <Home className="w-5 h-5 text-black" />
                 <span className="font-medium text-black">Add Unit</span>
               </button>
-              <button onClick={() => openModal('addRenter')} className="flex items-center space-x-2 px-4 py-3 bg-gray-300 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <button onClick={() => openModal('addRenter')} className="flex items-center space-x-2 px-4 py-3 bg-gray-300 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 transition-all">
                 <Users className="w-5 h-5 text-black" />
                 <span className="font-medium text-black">Add Renter</span>
               </button>
-              <button onClick={() => openModal('generateInvoice')} className="flex items-center space-x-2 px-4 py-3 bg-gray-300 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <button onClick={() => openModal('generateInvoice')} className="flex items-center space-x-2 px-4 py-3 bg-gray-300 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 transition-all">
                 <FileText className="w-5 h-5 text-black" />
                 <span className="font-medium text-black">Generate Invoice</span>
               </button>
@@ -171,16 +218,16 @@ const Main_Dashboard = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 backdrop-blur-sm"></div>
+          <div className="absolute inset-0 backdrop-blur-sm bg-black/30"></div>
           <div className="relative bg-gray-300 border-2 border-black rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gray-300 border-b-2 border-black p-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-gray-300 border-b-2 border-black p-4 flex items-center justify-between z-10">
               <h3 className="text-xl font-bold text-black">
                 {modalType === 'addProperty' && 'Add Property'}
                 {modalType === 'addUnit' && 'Add Unit'}
                 {modalType === 'addRenter' && 'Add Renter'}
                 {modalType === 'generateInvoice' && 'Generate Invoice'}
               </h3>
-              <button onClick={closeModal} className="bg-white border-2 border-black rounded-lg p-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <button onClick={closeModal} className="bg-white border-2 border-black rounded-lg p-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 transition-all">
                 <X className="w-5 h-5 text-black" />
               </button>
             </div>
@@ -194,26 +241,25 @@ const Main_Dashboard = () => {
                   <AddUnitForm onCloseButtonClick={closeModal} isEdit={false} />
               )}
               
-              {/* // TODO Here are more work to do  */}
               {modalType === 'addRenter' && (
                 <>
                   <div>
                     <label className="block text-sm font-bold text-black mb-1">Full Name</label>
-                    <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
+                    <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-bold text-black mb-1">Phone Number</label>
-                      <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
+                      <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all" />
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-black mb-1">NID Number</label>
-                      <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
+                      <input type="text" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-black mb-1">Date of Birth</label>
-                    <input type="date" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
+                    <input type="date" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all" />
                   </div>
                 </>
               )}
@@ -221,21 +267,34 @@ const Main_Dashboard = () => {
               {modalType === 'generateInvoice' && (
                 <>
                   <div>
-                    <label className="block text-sm font-bold text-black mb-1">Select Renter</label>
-                    <select className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none">
-                      <option>Select Renter</option>
-                      <option>John Smith</option>
-                      <option>Sarah Johnson</option>
-                      <option>Mike Brown</option>
+                    <label className="block text-sm font-bold text-black mb-1">* Select Renter</label>
+                    <select
+                      value={selectedRenterId}
+                      onChange={(e) => setSelectedRenterId(e.target.value)}
+                      className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer appearance-none"
+                      style={{ color: '#000000' }}
+                    >
+                      <option value="" disabled className="text-black">Select a Renter</option>
+                      {(renters || []).map(renter => (
+                        <option key={renter.id} value={renter.id} className="text-black">
+                          {renter?.full_name || `Renter ${renter.id}`}
+                        </option>
+                      ))}
                     </select>
+                    {(!renters || renters.length === 0) && (
+                      <p className="text-sm text-red-500 mt-1">No renters found in system.</p>
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-black mb-1">Month</label>
-                    <input type="month" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-black mb-1">Amount</label>
-                    <input type="number" className="w-full bg-white border-2 border-black rounded-lg py-2 px-3 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none" />
+                  
+                  <div className="grid grid-cols-2 gap-3 pt-4 border-t-2 border-black mt-4">
+                    <button
+                      type="button"
+                      onClick={() => handleGenerateInvoice(selectedRenterId)}
+                      disabled={!selectedRenterId}
+                      className="bg-blue-400 border-2 border-black rounded-lg px-4 py-3 font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Generate for Selected
+                    </button>
                   </div>
                 </>
               )}

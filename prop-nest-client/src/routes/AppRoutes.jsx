@@ -19,6 +19,7 @@ import Renter_Side_Bar from "../components/Renter_Dashboard/Renter_Side_Bar.jsx"
 import Renter_Main_Dashboard from "../components/Renter_Dashboard/Renter_Main_Dashboard.jsx";
 import Payment_Dashboard from "../components/Admin_Dashboard/Payment_Dashboard.jsx";
 import Maintenance_Dashboard from "../components/Admin_Dashboard/Maintenance_Dashboard.jsx";
+import Invoice_Page from "../components/Admin_Dashboard/Invoice_Page.jsx";
 
 const AppRoutes = () => {
   return (
@@ -43,6 +44,7 @@ const AppRoutes = () => {
           <Route path="bills-dashboard" element={<Bills_Dashboard />} />
           <Route path="payment-dashboard" element={<Payment_Dashboard />} />
           <Route path="maintenance-dashboard" element={<Maintenance_Dashboard />} />
+          <Route path="invoice/:id" element={<Invoice_Page />} />
         </Route>
       </Route>
 
